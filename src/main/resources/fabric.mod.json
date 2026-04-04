@@ -10,20 +10,14 @@
   "icon": "assets/dr-ng/icon.png",
   "environment": "server",
   "entrypoints": {
-    "fabric-datagen": [
-      "io.ula.drng.client.MainDataGenerator"
-    ],
     "main": [
       "io.ula.drng.Main"
     ]
   },
   "mixins": [
-    "dr-ng.mixins.json",
-    {
-      "config": "dr-ng.client.mixins.json",
-      "environment": "client"
-    }
+    "dr-ng.mixins.json"
   ],
+  "accessWidener": "dr-ng.accesswidener",
   "depends": {
     "fabricloader": ">=${loader_version}",
     "minecraft": "${minecraft_version}"

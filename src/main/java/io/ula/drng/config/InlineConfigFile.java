@@ -2,7 +2,6 @@ package io.ula.drng.config;
 
 import com.google.gson.JsonParser;
 import io.ula.drng.Main;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.NonNull;
 
 import java.io.BufferedReader;
@@ -14,8 +13,8 @@ import java.util.stream.Collectors;
 public class InlineConfigFile extends ConfigFile{
 
     private String path;
-    public InlineConfigFile(@NonNull String path,@NonNull String name, JavaPlugin plugin){
-        super(name,null,null,plugin);
+    public InlineConfigFile(@NonNull String path,@NonNull String name){
+        super(name,null,null);
         this.path = path + '/' + name;
         read();
     }

@@ -1,11 +1,10 @@
 package io.ula.drng.config;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.ula.drng.Main;
-import net.kyori.adventure.key.Key;
-import org.bukkit.plugin.java.JavaPlugin;
+import net.fabricmc.loader.api.FabricLoader;
+
 
 
 public class Configs {
@@ -29,8 +28,8 @@ public class Configs {
 //    public static ConfigFile PLAYER_EULA;
 //    public static ConfigFile CONFIG;
 //    public static InlineConfigFile COMMENTARY;
-    public static void init(Main ownerPlugin){
-        String version = ownerPlugin.getPluginMeta().getVersion();
+    public static void init(Main ownerMod){
+        String version = FabricLoader.getInstance().getModContainer("dr-ng").get().getMetadata().getVersion().toString();
         JsonObject mainConfigs = new JsonObject();
         JsonObject log_cmd = new JsonObject();
         mainConfigs.addProperty("version",version);
@@ -39,16 +38,14 @@ public class Configs {
         log_cmd.addProperty("version",version);
         log_cmd.add("commands",new JsonArray());
 
-        ConfigManager configManager = ownerPlugin.getConfigManager();
-         configManager.register(Key.key("drng:main"),new ConfigFile("config.json",null,mainConfigs,ownerPlugin));
-        configManager.register(Key.key("drng:log_cmd"),new ConfigFile("log_cmd.json",ConfigPath.COMMAND,log_cmd,ownerPlugin));
-        configManager.register(Key.key("drng:pms_codes"),new ConfigFile("permission_codes.json",ConfigPath.PERMISSION,null,ownerPlugin));
-        configManager.register(Key.key("drng:pms"),new ConfigFile("permissions.json",ConfigPath.PERMISSION,null,ownerPlugin));
-        configManager.register(Key.key("drng:titles"),new ConfigFile("player_titles.json",ConfigPath.PLAYER,null,ownerPlugin));
-        configManager.register(Key.key("drng:tips"),new ConfigFile("tips.json",ConfigPath.TALKBAR,null,ownerPlugin));
-        configManager.register(Key.key("drng:notices"),new ConfigFile("notices.json",ConfigPath.NOTICE,null,ownerPlugin));
-        configManager.register(Key.key("drng:homes"),new ConfigFile("player_homes.json",ConfigPath.PLAYER,null,ownerPlugin));
-        configManager.register(Key.key("drng:chat_replacements"),new ConfigFile("chat_replacements.json",ConfigPath.PLAYER,null,ownerPlugin));
-        configManager.register(Key.key("drng:eula"),new ConfigFile("player_eula.json",ConfigPath.PLAYER,null,ownerPlugin));
+        ConfigManager configManager = ownerMod.getConfigManager();
+         configManager.register("drng:main",new ConfigFile("config.json",null,mainConfigs));
+        configManager.register("drng:log_cmd",new ConfigFile("log_cmd.json",ConfigPath.COMMAND,log_cmd));
+        configManager.register("drng:titles",new ConfigFile("player_titles.json",ConfigPath.PLAYER,null));
+        configManager.register("drng:tips",new ConfigFile("tips.json",ConfigPath.TALKBAR,null));
+        configManager.register("drng:notices",new ConfigFile("notices.json",ConfigPath.NOTICE,null));
+        configManager.register("drng:homes",new ConfigFile("player_homes.json",ConfigPath.PLAYER,null));
+        configManager.register("drng:chat_replacements",new ConfigFile("chat_replacements.json",ConfigPath.PLAYER,null));
+        configManager.register("drng:eula",new ConfigFile("player_eula.json",ConfigPath.PLAYER,null));
     }
 }

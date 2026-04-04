@@ -1,4 +1,4 @@
-package io.ula.drng.mixin;
+package io.ula.drng.mixin.server;
 
 import io.ula.drng.Main;
 import net.minecraft.server.dedicated.ServerWatchdog;

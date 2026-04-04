@@ -4,6 +4,13 @@
   "package": "io.ula.drng.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "entity.PlayerMixin",
+    "server.ServerWatchDogMixin",
+    "server.network.ServerGamePacketListenerMixin",
+    "server.ServerExplosionMixin",
+    "server.network.ServerGamePacketListenerHolderMixin",
+    "entity.EntityMixin",
+    "server.players.PlayerListMixin"
   ],
   "injectors": {
     "defaultRequire": 1

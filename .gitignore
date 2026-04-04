@@ -117,3 +117,4 @@ runs/
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
+/minecraft-common-6dd721cd7d-1.21.11-loom.mappings.1_21_11.layered+hash.2198-v2/

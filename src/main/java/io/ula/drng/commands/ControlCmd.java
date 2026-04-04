@@ -2,72 +2,73 @@ package io.ula.drng.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import io.papermc.paper.command.brigadier.CommandSourceStack;
-import io.papermc.paper.command.brigadier.Commands;
-import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
-import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
+import io.ula.drng.attachments.Attachments;
+import io.ula.drng.attachments.PlayerStatusData;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.selector.EntitySelector;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.Permissions;
+import net.minecraft.world.entity.player.Player;
+import org.apache.logging.log4j.core.jmx.Server;
 
-import java.awt.*;
+
+
 import java.util.UUID;
 
 public class ControlCmd {
-    public static JavaPlugin plugin;
     public static final LiteralArgumentBuilder<CommandSourceStack> cCmd = Commands.literal("control")
-            .then(Commands.argument("player", ArgumentTypes.player())
+            .then(Commands.argument("player", EntityArgument.player())
                     .executes(commandContext -> {
-                        Player player = (Player)commandContext.getSource().getSender();
-                        PlayerSelectorArgumentResolver playerSelector = commandContext.getArgument("player", PlayerSelectorArgumentResolver.class);
-                        if(player.hasMetadata("controlling_player")){
-                            player.sendMessage(Component.text("无法控制(未退出正在进行的控制)").color(TextColor.color(Color.RED.getRGB())));
+                        ServerPlayer sender = commandContext.getSource().getPlayer();
+                        ServerPlayer target = commandContext.getArgument("player", EntitySelector.class).findSinglePlayer(commandContext.getSource());
+
+                        PlayerStatusData data = target.getAttached(Attachments.PLAYER_STATUS_DATA);
+                        if(data.is_controlling() != null){
+                            sender.sendSystemMessage(Component.literal("无法控制(未退出正在进行的控制)").withStyle(ChatFormatting.RED));
                             return 0;
                         }
-                        Player playerobj = playerSelector.resolve(commandContext.getSource()).getFirst();
-                        if (playerobj.equals(player)) {
-                            player.sendMessage(Component.text("无法控制(对象为自身)").color(TextColor.color(Color.RED.getRGB())));
+                        if (target.equals(sender)) {
+                            sender.sendSystemMessage(Component.literal("无法控制(对象为自身)").withStyle(ChatFormatting.RED));
                             return 0;
                         }
-                        if (playerobj.isOp()) {
-                            player.sendMessage(Component.text("无法控制(对象为Operator)").color(TextColor.color(Color.RED.getRGB())));
+                        if (target.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
+                            sender.sendSystemMessage(Component.literal("无法控制(对象为Operator)").withStyle(ChatFormatting.RED));
                             return 0;
                         }
-                        player.addPotionEffect(new PotionEffect(
-                                PotionEffectType.INVISIBILITY,
-                                Integer.MAX_VALUE,
-                                0,
-                                false,
-                                false
-                        ));
-                        playerobj.setMetadata("been_controlled", new FixedMetadataValue(plugin, player.getUniqueId()));//使用元数据标记被控制玩家，存储控制者
-                        player.setMetadata("controlling_player", new FixedMetadataValue(plugin, playerobj.getUniqueId()));//使用元数据标记控制玩家，存储被控制者
-                        player.setMetadata("location_before_control", new FixedMetadataValue(plugin, player.getLocation()));//存储控制者控制前的坐标
-                        player.teleport(playerobj.getLocation());
+
+                        sender.setInvisible(true);
+
+                        target.setAttached(Attachments.PLAYER_STATUS_DATA, new PlayerStatusData(sender.getUUID(),null,null));//使用元数据标记被控制玩家，存储控制者
+                        sender.setAttached(Attachments.PLAYER_STATUS_DATA,new PlayerStatusData(null,target.getUUID(), sender.position()));//使用元数据标记控制玩家，存储被控制者
+                        // 存储控制者控制前的坐标
+                        sender.setPos(target.position());
                         return 0;
                     })
             )
             .then(Commands.literal("stop").executes(commandContext -> {
-                Player player = (Player)commandContext.getSource().getSender();
-                if(player.hasMetadata("controlling_player")){
-                    Player target = Bukkit.getPlayer((UUID) player.getMetadata("controlling_player").getFirst().value());
-                    player.teleport((Location)player.getMetadata("location_before_control").getFirst().value());
-                    player.removeMetadata("controlling_player",plugin);
-                    player.removeMetadata("location_before_control",plugin);
-                    target.removeMetadata("been_controlled", plugin);
+                ServerPlayer player = commandContext.getSource().getPlayer();
+                PlayerStatusData data = player.getAttached(Attachments.PLAYER_STATUS_DATA);
 
-                    player.removePotionEffect(PotionEffectType.INVISIBILITY);
+                if(data.is_controlling() != null){
+                    ServerPlayer target = commandContext.getSource().getServer().getPlayerList().getPlayer(data.is_controlling());
+                    player.setPos(data.location_before_control());
+                    player.setAttached(Attachments.PLAYER_STATUS_DATA,new PlayerStatusData(null,null,null));
+                    target.setAttached(Attachments.PLAYER_STATUS_DATA,new PlayerStatusData(null,null,null));
+
+                    player.setInvisible(false);
                 }else{
-                    player.sendMessage(Component.text("没有正在进行的控制").color(TextColor.color(Color.RED.getRGB())));
+                    player.sendSystemMessage(Component.literal("没有正在进行的控制").withStyle(ChatFormatting.RED));
                 }
                 return 0;
             }))
-            .requires(commandSourceStack -> (commandSourceStack.getSender() instanceof Player && commandSourceStack.getSender().isOp()));
+            .requires(commandSourceStack -> (commandSourceStack.getPlayer() instanceof Player && commandSourceStack.getPlayer().permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)));
     public static final LiteralCommandNode<CommandSourceStack> buildCCmd = cCmd.build();
 }

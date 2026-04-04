@@ -1,14 +1,12 @@
 package io.ula.drng.config;
 
 import com.google.gson.*;
-import net.kyori.adventure.text.Component;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.NonNull;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,7 +14,7 @@ import java.nio.file.Path;
 
 
 public class ConfigFile {
-    protected File serverRoot = Bukkit.getServer().getWorldContainer();
+    protected Path serverRoot = FabricLoader.getInstance().getGameDir();
     protected final Logger LOGGER = LogManager.getLogger("dr-ng/config");
     protected JsonObject jsonObject = new JsonObject();
     protected JsonObject defaultContent;
@@ -26,23 +24,21 @@ public class ConfigFile {
     protected File file;
     protected String file_folder;
     protected String file_name;
-    protected JavaPlugin ownerPlugin;
-    public ConfigFile(@NonNull String name, String folder, JsonObject content, JavaPlugin plugin){
+    public ConfigFile(@NonNull String name, String folder, JsonObject content){
         if(folder != null) {
-            file = new File(String.format(serverRoot.getPath() + "/config/dr-ng/%s/%s", folder, name));
+            file = new File(String.format(serverRoot.toString() + "/config/dr-ng/%s/%s", folder, name));
         }else{
-            file = new File(String.format(serverRoot.getPath() + "/config/dr-ng/%s", name));
+            file = new File(String.format(serverRoot.toString() + "/config/dr-ng/%s", name));
         }
         file_name = name;
         file_folder = folder;
         defaultContent = content;
-        ownerPlugin = plugin;
     }
 
     public void createDir(){
-        if(file_folder != null && !Files.exists(Path.of(new File(serverRoot.getPath() + "/config/dr-ng/" + file_folder).toURI()))){
+        if(file_folder != null && !Files.exists(Path.of(new File(serverRoot.toString() + "/config/dr-ng/" + file_folder).toURI()))){
             try{
-                Files.createDirectory(Path.of(new File(serverRoot.getPath() + "/config/dr-ng/" + file_folder).toURI()));
+                Files.createDirectory(Path.of(new File(serverRoot.toString() + "/config/dr-ng/" + file_folder).toURI()));
             } catch (IOException e) {
                 LOGGER.error("Failed to create config directory :" + e.getMessage());
                 return;
@@ -64,7 +60,10 @@ public class ConfigFile {
                     LOGGER.error(String.format("Failed to create config file \"%s\" : ", file_name) + e.getMessage());
                     return;
                 }
-                addKey("version", ownerPlugin.getPluginMeta().getVersion());
+                if(FabricLoader.getInstance().getModContainer("dr-ng").isPresent())
+                    addKey("version", FabricLoader.getInstance().getModContainer("dr-ng").get().getMetadata().getVersion().toString());
+                else
+                    addKey("version","Unknown");
             }
         }
     }

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "dr-ng",
+  "version": "${version}",
+  "name": "Desideraregio - Mod",
+  "description": "Desideraregio - Next基本模组",
+  "authors": [],
+  "contact": {},
+  "license": "GPL-3.0",
+  "icon": "assets/dr-ng/icon.png",
+  "environment": "server",
+  "entrypoints": {
+    "fabric-datagen": [
+      "io.ula.drng.client.MainDataGenerator"
+    ],
+    "main": [
+      "io.ula.drng.Main"
+    ]
+  },
+  "mixins": [
+    "dr-ng.mixins.json",
+    {
+      "config": "dr-ng.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "minecraft": "${minecraft_version}"
+  }
+}

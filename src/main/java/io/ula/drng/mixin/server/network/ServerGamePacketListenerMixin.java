@@ -60,41 +60,36 @@ public class ServerGamePacketListenerMixin {
     private void cancellMovment(CallbackInfo ci){
         ServerPlayer sender = this.player;
         PlayerStatusData data = sender.getAttached(Attachments.PLAYER_STATUS_DATA);
-        if(data != null){
-            if(data.been_controlled() != null)
-                ci.cancel();
-            if(data.is_controlling() != null){
-                ServerPlayer target = this.server.getPlayerList().getPlayer(data.is_controlling());
+        if(data!=null&&data.been_controlled() != null)
+            ci.cancel();
+    }
+    @Inject(method="handleMovePlayer",at = @At("TAIL"))
+    private void movementInject(CallbackInfo ci){
+        ServerPlayer sender = this.player;
+        PlayerStatusData data = sender.getAttached(Attachments.PLAYER_STATUS_DATA);
+        if(data!=null&& data.is_controlling() != null){
+            ServerPlayer target = this.server.getPlayerList().getPlayer(data.is_controlling());
 
-                ClientboundSetActionBarTextPacket controllerPacket = new ClientboundSetActionBarTextPacket(Component.literal(String.format("你正在控制%s!", target.getName())).withStyle(ChatFormatting.RED));
-                ClientboundSetActionBarTextPacket targetPacket = new ClientboundSetActionBarTextPacket(Component.literal(String.format("你正在被 %s 控制!", player.getName())).withStyle(ChatFormatting.RED));
-                player.connection.send(controllerPacket);
-                target.connection.send(targetPacket);
-                double nx=0,nz=0;
-                switch(player.getDirection()){
-                    case NORTH -> nz=player.getZ()+0.6;
-                    case SOUTH -> nz=player.getZ()-0.6;
-                    case WEST -> nx = player.getX()+0.6;
-                    case EAST -> nx = player.getX()-0.6;
-                }
-                target.teleportTo(sender.level(),
-                        nx,
-                        player.getY(),
-                        nz,
-                        Collections.emptySet(),
-                        player.getYRot(),
-                        player.getXRot(),
-                        true
-                        );
-
-                ClientboundPlayerPositionPacket targetPosSynvPack =  new ClientboundPlayerPositionPacket(
-                        1,
-                        PositionMoveRotation.of(target),
-                        Collections.emptySet()
-                );
-                target.connection.send(targetPosSynvPack);
+            ClientboundSetActionBarTextPacket controllerPacket = new ClientboundSetActionBarTextPacket(Component.literal(String.format("你正在控制%s!", target.getName().getString())).withStyle(ChatFormatting.RED));
+            ClientboundSetActionBarTextPacket targetPacket = new ClientboundSetActionBarTextPacket(Component.literal(String.format("你正在被 %s 控制!", player.getName().getString())).withStyle(ChatFormatting.RED));
+            player.connection.send(controllerPacket);
+            target.connection.send(targetPacket);
+            double nx= player.getX(), nz=player.getZ();
+            switch(player.getDirection()){
+                case NORTH -> nz+=0.6;
+                case SOUTH -> nz=nz-0.6;
+                case WEST -> nx +=0.6;
+                case EAST -> nx = nx-0.6;
             }
+            target.teleportTo(sender.level(),
+                    nx,
+                    player.getY(),
+                    nz,
+                    Collections.emptySet(),
+                    player.getYRot(),
+                    player.getXRot(),
+                    false
+            );
         }
-
     }
 }

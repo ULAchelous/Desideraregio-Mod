@@ -111,7 +111,7 @@ public class PlayerUtils {
 //
     public static void initPlayerStatus(ServerPlayer player){
         if(player.getAttached(Attachments.PLAYER_STATUS_DATA) == null)
-            player.setAttached(Attachments.PLAYER_STATUS_DATA,new PlayerStatusData(null,null,null));
+            player.setAttached(Attachments.PLAYER_STATUS_DATA,new PlayerStatusData(null,null,null,null));
         if(player.getAttached(Attachments.PLAYER_CNT_DATA) == null)
             player.setAttached(Attachments.PLAYER_CNT_DATA,new PlayerCntData(0,0,0));
         //init Metadata

@@ -1,104 +1,106 @@
-//package io.ula.drng.utils;
-//
-//import com.google.gson.JsonArray;
-//import com.google.gson.JsonElement;
-//import com.google.gson.JsonObject;
-//import io.ula.drng.Main;
-//import io.ula.drng.commands.NoticeCmd;
-//import io.ula.drng.config.ConfigFile;
-//import net.kyori.adventure.key.Key;
-//import net.kyori.adventure.text.Component;
-//import net.kyori.adventure.text.event.ClickCallback;
-//import net.kyori.adventure.text.event.ClickEvent;
-//import net.kyori.adventure.text.format.TextColor;
-//import net.kyori.adventure.text.format.TextDecoration;
-//import net.kyori.adventure.text.object.ObjectContents;
-//import org.bukkit.Bukkit;
-//import org.bukkit.World;
-//import org.bukkit.entity.Entity;
-//import org.bukkit.entity.EntityType;
-//
-//import java.awt.*;
-//import java.time.Duration;
-//import java.util.Random;
-//
-//import static org.bukkit.Bukkit.getServer;
-//
-//public class TBUtils {
-//    public  static Main ownerPlugin;
-//    public static void aliceBehaviour(){
-//        int owCnt = 0, netherCnt = 0, teCnt = 0;
-//        World overworld = Bukkit.getWorld(Key.key("overworld"));
-//        World nether = Bukkit.getWorld(Key.key("the_nether"));
-//        World the_end = Bukkit.getWorld(Key.key("the_end"));
-//        if(overworld.getEntities().size() >= 2700) {
-//            for (Entity entity : overworld.getEntities()) {
-//                if (entity.getType() == EntityType.ITEM) {
-//                    entity.remove();
-//                    owCnt++;
-//                }
-//            }
-//        }
-//        if(nether.getEntities().size() >= 2700){
-//            for (Entity entity : nether.getEntities()) {
-//                if (entity.getType() == EntityType.ITEM) {
-//                    entity.remove();
-//                    netherCnt++;
-//                }
-//            }
-//        }
-//        if(the_end.getEntities().size() >= 2700) {
-//            for (Entity entity : the_end.getEntities()) {
-//                if (entity.getType() == EntityType.ITEM) {
-//                    entity.remove();
-//                    teCnt++;
-//                }
-//            }
-//        }
-//        if((owCnt | netherCnt | teCnt) != 0) {
-//            getServer().sendMessage(Component.empty()
-//                    .append(Component.object(ObjectContents.playerHead("AZ9C")))
-//                    .append(Component.text("["))
-//                    .append(Component.text("AL-1S").color(TextColor.fromCSSHexString("#76d7ea")).decorate(TextDecoration.BOLD))
-//                    .append(Component.text("]"))
-//                    .append(Component.space())
-//                    .append(Component.text("吃掉了").append(Component.space()).append(Component.text(owCnt + netherCnt + teCnt, TextColor.color(Color.YELLOW.getRGB()))).append(Component.space()).append(Component.text("个掉落物！")))
-//            );
-//            getServer().sendMessage(Component.text("主世界：")
-//                    .append(Component.text(owCnt, TextColor.color(Color.YELLOW.getRGB())).decorate(TextDecoration.BOLD))
-//                    .append(Component.space())
-//                    .append(Component.text("下界："))
-//                    .append(Component.text(netherCnt, TextColor.color(Color.YELLOW.getRGB())).decorate(TextDecoration.BOLD))
-//                    .append(Component.space())
-//                    .append(Component.text("末地："))
-//                    .append(Component.text(teCnt, TextColor.color(Color.YELLOW.getRGB())).decorate(TextDecoration.BOLD))
-//            );
-//        }
-//    }
-//
-//    public static void tipsBehaviour(){
-//        ConfigFile DRNG_TIPS = ownerPlugin.getConfigManager().getConfig(Key.key("drng:tips"));
-//        JsonArray tips = DRNG_TIPS.getKey("tips").getAsJsonArray();
-//        getServer().sendMessage(Component.text("[")
-//                .decorate(TextDecoration.BOLD)
-//                .append(Component.text("提示").color(TextColor.color(Color.YELLOW.getRGB())))
-//                .append(Component.text("]:"))
-//        );
-//        getServer().sendMessage(Component.text(tips.get(new Random().nextInt(tips.size())).getAsString()));
-//    }
-//
+package io.ula.drng.utils;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.mojang.authlib.GameProfile;
+import io.ula.drng.Main;
+import io.ula.drng.config.ConfigFile;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.contents.ObjectContents;
+import net.minecraft.network.chat.contents.objects.PlayerSprite;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.component.ResolvableProfile;
+import net.minecraft.world.level.Level;
+import org.spongepowered.tools.obfuscation.mirror.mapping.MappingMethodResolvable;
+
+import java.time.Duration;
+import java.util.Random;
+import java.util.UUID;
+
+
+public class TBUtils {
+    private static MinecraftServer server = (MinecraftServer) FabricLoader.getInstance().getGameInstance();
+    public static void aliceBehaviour(){
+        int owCnt = 0, netherCnt = 0, teCnt = 0;
+        ServerLevel overworld = server.overworld();
+        ServerLevel nether = server.getLevel(Level.NETHER);
+        ServerLevel the_end = server.getLevel(Level.END);
+        for (Entity entity : overworld.getAllEntities()) {
+                if (entity.getType() == EntityType.ITEM) {
+                    entity.remove(Entity.RemovalReason.DISCARDED);
+                    owCnt++;
+                }
+        }
+        for (Entity entity : nether.getAllEntities()) {
+            if (entity.getType() == EntityType.ITEM) {
+                entity.remove(Entity.RemovalReason.DISCARDED);
+                netherCnt++;
+            }
+        }
+        for (Entity entity : the_end.getAllEntities()) {
+            if (entity.getType() == EntityType.ITEM) {
+                entity.remove(Entity.RemovalReason.DISCARDED);
+                teCnt++;
+            }
+        }
+        if((owCnt | netherCnt | teCnt) != 0) {
+            ResolvableProfile profile = ResolvableProfile.createResolved(new GameProfile(UUID.fromString("793be6b0-de85-412a-8483-636d6f8c74d0"),"AZ9C"));
+            new GameProfile(UUID.fromString("793be6b0-de85-412a-8483-636d6f8c74d0"),"AZ9C");
+            server.sendSystemMessage(Component.empty()
+                    .append(Component.object(new PlayerSprite(profile,true)))
+                    .append(Component.literal("["))
+                    .append(Component.literal("AL-1S").setStyle(Style.EMPTY.withColor(0x76d7ea).applyFormat(ChatFormatting.BOLD)))
+                    .append(Component.literal("]"))
+                    .append(" ")
+                    .append(Component.literal("吃掉了")
+                            .append(" ")
+                            .append(Component.literal(Integer.toString(owCnt + netherCnt + teCnt)).withStyle(ChatFormatting.AQUA,ChatFormatting.BOLD))
+                            .append(" ")
+                            .append(Component.literal("个掉落物！")))
+            );
+            server.sendSystemMessage(Component.literal("主世界：")
+                    .append(Component.literal(Integer.toString(owCnt)).withStyle(ChatFormatting.YELLOW))
+                    .append(" ")
+                    .append(Component.literal("下界："))
+                    .append(Component.literal(Integer.toString(netherCnt)).withStyle(ChatFormatting.YELLOW))
+                    .append(" ")
+                    .append(Component.literal("末地："))
+                    .append(Component.literal(Integer.toString(teCnt)).withStyle(ChatFormatting.YELLOW))
+            );
+        }
+    }
+
+    public static void tipsBehaviour(){
+        ConfigFile DRNG_TIPS = Main.getConfigManager().getConfig("drng:tips");
+        JsonArray tips = DRNG_TIPS.getKey("tips").getAsJsonArray();
+        server.sendSystemMessage(Component.literal("[")
+                        .withStyle(ChatFormatting.BOLD)
+                .append(Component.literal("提示").withStyle(ChatFormatting.YELLOW))
+                .append(Component.literal("]:"))
+        );
+        server.sendSystemMessage(Component.literal(tips.get(new Random().nextInt(tips.size())).getAsString()));
+    }
+
 //    public static Component getFlowingNoticeBoard(){
-//        Component nb = Component.text("----------流动公告----------").append(Component.newline());
+//        Component nb = Component.literal("----------流动公告----------").append(Component.newline());
 //        ConfigFile NOTICE = ownerPlugin.getConfigManager().getConfig(Key.key("drng:notices"));
 //        if(NOTICE.has("notices")){
 //            for(JsonElement element : NOTICE.getKey("notices").getAsJsonArray()){
 //                JsonObject jsonObject = element.getAsJsonObject();
-//                nb = nb.append(Component.text(jsonObject.get("author").getAsString(),TextColor.color(Color.GRAY.getRGB()))).append(Component.text(":"))
+//                nb = nb.append(Component.literal(jsonObject.get("author").getAsString(),TextColor.color(Color.GRAY.getRGB()))).append(Component.literal(":"))
 //                        .append(Component.space())
-//                        .append(Component.text(jsonObject.get("introduction").getAsString()))
+//                        .append(Component.literal(jsonObject.get("introduction").getAsString()))
 //                        .append(Component.newline());
 //            }
-//            nb = nb.append(Component.text("点击查看详情",TextColor.color(Color.YELLOW.getRGB())))
+//            nb = nb.append(Component.literal("点击查看详情",TextColor.color(Color.YELLOW.getRGB())))
 //                    .clickEvent(ClickEvent.callback(audience -> {
 //                        audience.openBook(NoticeCmd.getNoticeBook());
 //                    }, ClickCallback.Options.builder().lifetime(Duration.ofSeconds(180)).build()))
@@ -108,4 +110,4 @@
 //            return null;
 //        }
 //    }
-//}
+}

@@ -10,7 +10,9 @@
     "server.ServerExplosionMixin",
     "server.network.ServerGamePacketListenerHolderMixin",
     "entity.EntityMixin",
-    "server.players.PlayerListMixin"
+    "server.players.PlayerListMixin",
+    "server.MinecraftServerMixin",
+    "server.network.ServerCommonPacketListenerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

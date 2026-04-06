@@ -10,11 +10,12 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
-public record PlayerStatusData(@Nullable UUID been_controlled, @Nullable UUID is_controlling, @Nullable Vec3 location_before_control) {
+public record PlayerStatusData(@Nullable UUID been_controlled, @Nullable UUID is_controlling, @Nullable Vec3 location_before_control,@Nullable UUID tpa_target) {
     public static final Codec<PlayerStatusData> CODEC = RecordCodecBuilder.create(instance -> instance
             .group(
                     UUIDUtil.CODEC.fieldOf("been_controlled_by").forGetter(PlayerStatusData::been_controlled),
                     UUIDUtil.CODEC.fieldOf("is_controlling").forGetter(PlayerStatusData::is_controlling),
-                    Vec3.CODEC.fieldOf("location_before_control").forGetter(PlayerStatusData::location_before_control)
+                    Vec3.CODEC.fieldOf("location_before_control").forGetter(PlayerStatusData::location_before_control),
+                    UUIDUtil.CODEC.fieldOf("tpa_target").forGetter(PlayerStatusData::tpa_target)
             ).apply(instance,PlayerStatusData::new));
 }

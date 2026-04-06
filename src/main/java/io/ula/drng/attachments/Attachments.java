@@ -18,7 +18,7 @@ public class Attachments {
     );
     public static final AttachmentType<PlayerStatusData> PLAYER_STATUS_DATA = AttachmentRegistry.create(Identifier.fromNamespaceAndPath("dr-ng","player_status"),
             playerStatusDataBuilder -> playerStatusDataBuilder
-                    .initializer(() -> new PlayerStatusData(null,null,null))
+                    .initializer(() -> new PlayerStatusData(null,null,null,null))
                     .persistent(PlayerStatusData.CODEC)
                     .copyOnDeath()
     );

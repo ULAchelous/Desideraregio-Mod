@@ -1,3 +1,7 @@
 accessWidener	v1	named
-
+#ServerGamePacketListenerImpl.EntityInteraction
 accessible	class	net/minecraft/server/network/ServerGamePacketListenerImpl$EntityInteraction
+
+#ParsedTemplate
+accessible  method net/minecraft/server/dialog/action/ParsedTemplate  parse (Ljava/lang/String;)Lcom/mojang/serialization/DataResult;
+accessible  method net/minecraft/server/dialog/action/ParsedTemplate <init> (Ljava/lang/String;Lnet/minecraft/commands/functions/StringTemplate;)V

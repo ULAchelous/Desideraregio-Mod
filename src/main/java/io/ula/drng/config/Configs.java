@@ -29,7 +29,8 @@ public class Configs {
 //    public static ConfigFile CONFIG;
 //    public static InlineConfigFile COMMENTARY;
     public static void init(Main ownerMod){
-        String version = FabricLoader.getInstance().getModContainer("dr-ng").get().getMetadata().getVersion().toString();
+        String version = Main.getVersion();
+
         JsonObject mainConfigs = new JsonObject();
         JsonObject log_cmd = new JsonObject();
         mainConfigs.addProperty("version",version);
@@ -47,5 +48,6 @@ public class Configs {
         configManager.register("drng:homes",new ConfigFile("player_homes.json",ConfigPath.PLAYER,null));
         configManager.register("drng:chat_replacements",new ConfigFile("chat_replacements.json",ConfigPath.PLAYER,null));
         configManager.register("drng:eula",new ConfigFile("player_eula.json",ConfigPath.PLAYER,null));
+        configManager.register("drng:eula_contents",new InlineConfigFile(ConfigPath.INLINE_TRANSLATABLE,"eula.json"));
     }
 }

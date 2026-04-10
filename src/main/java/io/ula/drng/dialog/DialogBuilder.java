@@ -1,13 +1,11 @@
 package io.ula.drng.dialog;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.dialog.*;
 import net.minecraft.server.dialog.action.CustomAll;
 import net.minecraft.server.dialog.body.DialogBody;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,8 +13,9 @@ public class DialogBuilder {
     private Component title;
     private DialogAction afterAction = DialogAction.CLOSE;
     private List<Input> inputs = new ArrayList<>();
-    private List<DialogBody> bodys = new ArrayList<>();
+    private List<DialogBody> bodies = new ArrayList<>();
     private List<ActionButton> buttons = new ArrayList<>();
+    private boolean cancellable = false;
     public DialogBuilder(Component title){
         this.title = title;
     }
@@ -31,8 +30,8 @@ public class DialogBuilder {
         this.inputs = inputs;
         return this;
     }
-    public DialogBuilder bodys(List<DialogBody> bodys){
-        this.bodys = bodys;
+    public DialogBuilder bodies(List<DialogBody> bodies){
+        this.bodies = bodies;
         return this;
     }
     public DialogBuilder actions(List<ActionButton> buttons){
@@ -43,14 +42,18 @@ public class DialogBuilder {
         this.afterAction = action;
         return this;
     }
+    public DialogBuilder cancellable(Boolean cancellable){
+        this.cancellable = cancellable;
+        return this;
+    }
     public Dialog build(){
         CommonDialogData commonDialogData = new CommonDialogData(
                 this.title,
                 Optional.empty(),
-                false,
+                this.cancellable,
                 true,
                 afterAction,
-                bodys,
+                bodies,
                 inputs
         );
         for(ActionButton button : buttons){
@@ -59,6 +62,6 @@ public class DialogBuilder {
                     DialogHelper.addCustomClick(customAll.id(),customAll);
             });
         }
-        return new MultiActionDialog(commonDialogData,buttons, Optional.empty(),inputs.size()+bodys.size());
+        return new MultiActionDialog(commonDialogData,buttons, Optional.empty(),inputs.size()+bodies.size());
     }
 }

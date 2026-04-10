@@ -1,13 +1,10 @@
 package io.ula.drng.attachments;
 
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.codecs.PrimitiveCodec;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
-import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.minecraft.resources.Identifier;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class Attachments {
@@ -18,7 +15,7 @@ public class Attachments {
     );
     public static final AttachmentType<PlayerStatusData> PLAYER_STATUS_DATA = AttachmentRegistry.create(Identifier.fromNamespaceAndPath("dr-ng","player_status"),
             playerStatusDataBuilder -> playerStatusDataBuilder
-                    .initializer(() -> new PlayerStatusData(null,null,null,null))
+                    .initializer(() -> new PlayerStatusData(Optional.empty(),Optional.empty(),Optional.empty(),Optional.empty()))
                     .persistent(PlayerStatusData.CODEC)
                     .copyOnDeath()
     );

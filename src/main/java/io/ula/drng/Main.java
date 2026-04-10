@@ -44,7 +44,7 @@ public class Main implements ModInitializer {
     @Override
     public void onInitialize() {
         configManager = new ConfigManager();
-        Configs.init(this);
+        Configs.init();
         commandsRegister();
         callbackRegister();
     }
@@ -97,6 +97,7 @@ public class Main implements ModInitializer {
                 ClientboundShowDialogPacket packet = new ClientboundShowDialogPacket(Holder.direct(CustomDialogs.EULA_DIALOG));
                 serverPlayer.connection.send(packet);
             }
+            serverPlayer.sendSystemMessage(TBUtils.getFlowingNoticeBoard());
         });
         PlayerBlockBreakEvents.AFTER.register((level, player, blockPos, blockState, blockEntity) -> {
             PlayerCntData data = player.getAttached(Attachments.PLAYER_CNT_DATA);

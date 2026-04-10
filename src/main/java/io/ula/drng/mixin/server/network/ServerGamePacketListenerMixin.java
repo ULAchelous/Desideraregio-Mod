@@ -1,10 +1,14 @@
 package io.ula.drng.mixin.server.network;
 
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import io.ula.drng.Main;
 
 import io.ula.drng.attachments.Attachments;
 import io.ula.drng.attachments.PlayerStatusData;
+import io.ula.drng.config.ConfigFile;
 import io.ula.drng.utils.PlayerUtils;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
@@ -16,6 +20,7 @@ import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.network.protocol.game.ClientboundEntityPositionSyncPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
+import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -32,6 +37,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.awt.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Mixin(ServerGamePacketListenerImpl.class)
@@ -56,19 +63,12 @@ public class ServerGamePacketListenerMixin {
         playerList.broadcastSystemMessage(loginMsg,b1);
     }
 
-    @Inject(method = "handleMovePlayer",at = @At("HEAD"),cancellable = true)
-    private void cancellMovment(CallbackInfo ci){
-        ServerPlayer sender = this.player;
-        PlayerStatusData data = sender.getAttached(Attachments.PLAYER_STATUS_DATA);
-        if(data!=null&&data.been_controlled() != null)
-            ci.cancel();
-    }
     @Inject(method="handleMovePlayer",at = @At("TAIL"))
     private void movementInject(CallbackInfo ci){
         ServerPlayer sender = this.player;
         PlayerStatusData data = sender.getAttached(Attachments.PLAYER_STATUS_DATA);
-        if(data!=null&& data.is_controlling() != null){
-            ServerPlayer target = this.server.getPlayerList().getPlayer(data.is_controlling());
+        if(data!=null&& !data.is_controlling().isEmpty()){
+            ServerPlayer target = this.server.getPlayerList().getPlayer(data.is_controlling().get());
 
             ClientboundSetActionBarTextPacket controllerPacket = new ClientboundSetActionBarTextPacket(Component.literal(String.format("你正在控制%s!", target.getName().getString())).withStyle(ChatFormatting.RED));
             ClientboundSetActionBarTextPacket targetPacket = new ClientboundSetActionBarTextPacket(Component.literal(String.format("你正在被 %s 控制!", player.getName().getString())).withStyle(ChatFormatting.RED));
@@ -92,4 +92,5 @@ public class ServerGamePacketListenerMixin {
             );
         }
     }
+
 }

@@ -105,15 +105,15 @@ public class ScoreBoardHelper {
         //更新数值
         switch(type) {
             case DEATH_COUNT:
-                Component c1 = Component.literal("死亡计数: ").append(Component.literal(Integer.toString(playerCntData.deathCnt())).withStyle(ChatFormatting.AQUA,ChatFormatting.BOLD));
+                Component c1 = Component.literal("死亡计数: ").append(Component.literal(Long.toString(playerCntData.deathCnt())).withStyle(ChatFormatting.AQUA,ChatFormatting.BOLD));
                 sendScore2Player(player,"deathCnt",objective,c1,BlankFormat.INSTANCE,3);
                 break;
             case DIG_COUNT:
-                Component c2 = Component.literal("挖掘计数: ").append(Component.literal(Integer.toString(playerCntData.digCnt())).withStyle(ChatFormatting.AQUA,ChatFormatting.BOLD));
+                Component c2 = Component.literal("挖掘计数: ").append(Component.literal(Long.toString(playerCntData.digCnt())).withStyle(ChatFormatting.AQUA,ChatFormatting.BOLD));
                 sendScore2Player(player,"digCnt",objective,c2,BlankFormat.INSTANCE,3);
                 break;
             case ONLINE_TIME:
-                Component c3 = Component.literal("在线时长: ").append(Component.literal(getOnlineTime(playerCntData.onlineTime())).withStyle(ChatFormatting.AQUA,ChatFormatting.BOLD));
+                Component c3 = Component.literal("在线时长: ").append(Component.literal(getOnlineTime(((int)playerCntData.onlineTime()))).withStyle(ChatFormatting.AQUA,ChatFormatting.BOLD));
                 sendScore2Player(player,"onlineTime",objective,c3,BlankFormat.INSTANCE,3);
                 break;
         }

@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.ula.drng.Main;
+import io.ula.drng.config.ConfigFile;
 import io.ula.drng.config.ConfigManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -17,7 +18,8 @@ public class ConfigCmd {
             .then(Commands.literal("save").executes(
                commandContext -> {
                    ConfigManager configManager = Main.getConfigManager();
-                   commandContext.getSource().getPlayer().sendSystemMessage(Component.literal("已保存配置文件中的更改！"));
+                   if(commandContext.getSource().getEntity() != null && commandContext.getSource().isPlayer())
+                       commandContext.getSource().getPlayer().sendSystemMessage(Component.literal("已保存配置文件中的更改！"));
                    new Thread(configManager::saveAll).start();
                    return 0;
                }
@@ -25,7 +27,8 @@ public class ConfigCmd {
             .then(Commands.literal("reload").executes(
                     commandContext -> {
                         ConfigManager configManager = Main.getConfigManager();
-                        commandContext.getSource().getPlayer().sendSystemMessage(Component.literal("已重新加载配置文件！"));
+                        if(commandContext.getSource().getEntity() != null && commandContext.getSource().isPlayer())
+                            commandContext.getSource().getPlayer().sendSystemMessage(Component.literal("已重新加载配置文件！"));
                         new Thread(configManager::reloadAll).start();
                         return 0;
                     }
@@ -39,7 +42,11 @@ public class ConfigCmd {
                                         .append(Component.literal(Integer.toString(period)).withStyle(ChatFormatting.YELLOW))
                                         .append(" 分钟！")
                                 );
-                                new Thread(() -> configManager.setAutoSave(period)).start();
+                                new Thread(() -> {
+                                    ConfigFile MAIN_CONFIG = Main.getConfigManager().getConfig("drng:main");
+                                    MAIN_CONFIG.removeKey("autoSavePeriod");
+                                    MAIN_CONFIG.addKey("autoSavePeriod",period);
+                                }).start();
                                 return 0;
                             })
                     ))

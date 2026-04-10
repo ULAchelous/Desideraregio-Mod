@@ -23,22 +23,9 @@ public class CustomChatDecorator implements ChatDecorator {
                 CHAT_REPLACEMENTS.getKey(serverPlayer.getName().getString()).getAsJsonArray().remove(element);
                 continue;
             }
-            message+="☐";
-            String key = element.getAsJsonObject().get("key").getAsString();
-            String replace = element.getAsJsonObject().get("replace").getAsString();
-            String[] temp = message.split(key);
-            message="";
-            int len = temp.length;
-            if(temp[len -1].equals("☐")){
-                for(int idx = 0; idx < len-1; idx++) message += temp[idx] + replace;
-            }else {
-                for (int idx = 0; idx < len; idx++) {
-                    if(idx == len-1)
-                        message += temp[idx].substring(0,temp[idx].length()-1);
-                    else
-                        message += temp[idx]+replace;
-                }
-            }
+            String regex = element.getAsJsonObject().get("key").getAsString();
+            String replacement = element.getAsJsonObject().get("replace").getAsString();
+            message = message.replaceAll(regex,replacement);
         }
         return  Component.literal(message);
     }

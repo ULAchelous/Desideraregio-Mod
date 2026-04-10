@@ -8,6 +8,7 @@ import io.ula.drng.Main;
 import io.ula.drng.config.ConfigFile;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -89,25 +90,22 @@ public class TBUtils {
         server.sendSystemMessage(Component.literal(tips.get(new Random().nextInt(tips.size())).getAsString()));
     }
 
-//    public static Component getFlowingNoticeBoard(){
-//        Component nb = Component.literal("----------流动公告----------").append(Component.newline());
-//        ConfigFile NOTICE = ownerPlugin.getConfigManager().getConfig(Key.key("drng:notices"));
-//        if(NOTICE.has("notices")){
-//            for(JsonElement element : NOTICE.getKey("notices").getAsJsonArray()){
-//                JsonObject jsonObject = element.getAsJsonObject();
-//                nb = nb.append(Component.literal(jsonObject.get("author").getAsString(),TextColor.color(Color.GRAY.getRGB()))).append(Component.literal(":"))
-//                        .append(Component.space())
-//                        .append(Component.literal(jsonObject.get("introduction").getAsString()))
-//                        .append(Component.newline());
-//            }
-//            nb = nb.append(Component.literal("点击查看详情",TextColor.color(Color.YELLOW.getRGB())))
-//                    .clickEvent(ClickEvent.callback(audience -> {
-//                        audience.openBook(NoticeCmd.getNoticeBook());
-//                    }, ClickCallback.Options.builder().lifetime(Duration.ofSeconds(180)).build()))
-//                    .append(Component.newline());
-//            return nb;
-//        }else{
-//            return null;
-//        }
-//    }
+    public static Component getFlowingNoticeBoard(){
+        Component nb = Component.literal("----------流动公告----------").append("\n");
+        ConfigFile NOTICE = Main.getConfigManager().getConfig("drng:notices");
+        if(NOTICE.has("notices")){
+            for(JsonElement element : NOTICE.getKey("notices").getAsJsonArray()){
+                JsonObject jsonObject = element.getAsJsonObject();
+                nb = nb.copy().append(Component.literal(jsonObject.get("author").getAsString()).withStyle(ChatFormatting.GRAY))
+                        .append(Component.literal(":"))
+                        .append(" ")
+                        .append(Component.literal(jsonObject.get("title").getAsString()))
+                        .append("\n");
+            }
+            nb = nb.copy().append(Component.literal("点击查看详情").setStyle(Style.EMPTY.applyFormat(ChatFormatting.AQUA).withClickEvent(new ClickEvent.RunCommand("/notice list"))));
+            return nb;
+        }else{
+            return null;
+        }
+    }
 }

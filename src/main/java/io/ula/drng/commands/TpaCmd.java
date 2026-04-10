@@ -24,6 +24,8 @@ import net.minecraft.world.entity.player.Player;
 
 
 import java.time.Duration;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -37,11 +39,11 @@ public class TpaCmd {
                 serverScheduler.runTask(new ScheduleTask(sendr.getName().getString() + "TpaTimeOut",() -> {
                     sendr.sendSystemMessage(Component.literal("传送请求超时").withStyle(ChatFormatting.RED));
                     PlayerStatusData targetData = sendr.getAttached(Attachments.PLAYER_STATUS_DATA);
-                    sendr.setAttached(Attachments.PLAYER_STATUS_DATA,new PlayerStatusData(targetData.been_controlled(),targetData.is_controlling(),targetData.location_before_control(),null));
+                    sendr.setAttached(Attachments.PLAYER_STATUS_DATA,new PlayerStatusData(targetData.been_controlled(),targetData.is_controlling(),targetData.location_before_control(),Optional.empty()));
                 },20*15));
 
                 PlayerStatusData senderData = sendr.getAttached(Attachments.PLAYER_STATUS_DATA);
-                sendr.setAttached(Attachments.PLAYER_STATUS_DATA,new PlayerStatusData(senderData.been_controlled(),senderData.is_controlling(),senderData.location_before_control(),target.getUUID()));
+                sendr.setAttached(Attachments.PLAYER_STATUS_DATA,new PlayerStatusData(senderData.been_controlled(),senderData.is_controlling(),senderData.location_before_control(), Optional.of(target.getUUID())));
 
                 sendr.sendSystemMessage(Component.literal("请耐心等待对方接受传送哦~"));
                 target.sendSystemMessage(Component.literal("玩家 ")
@@ -77,8 +79,15 @@ public class TpaCmd {
                         PlayerStatusData targetData = target.getAttached(Attachments.PLAYER_STATUS_DATA);
                         if(targetData.tpa_target() != null && targetData.tpa_target().equals(sender.getUUID())) {
                             serverScheduler.getTask(target.getName().getString()+"TpaTimeOut").cancel();
-                            target.teleportTo(sender.getX(), sender.getY(), sender.getZ());
-                            target.setAttached(Attachments.PLAYER_STATUS_DATA,new PlayerStatusData(targetData.been_controlled(),targetData.is_controlling(),targetData.location_before_control(),null));
+                            target.teleportTo(
+                                    sender.level(),
+                                    sender.getX(), sender.getY(), sender.getZ(),
+                                    Collections.emptySet(),
+                                    sender.getYRot(),
+                                    sender.getXRot(),
+                                    false
+                                    );
+                            target.setAttached(Attachments.PLAYER_STATUS_DATA,new PlayerStatusData(targetData.been_controlled(),targetData.is_controlling(),targetData.location_before_control(),Optional.empty()));
                         }
                         return 0;
                     }))
@@ -90,7 +99,7 @@ public class TpaCmd {
                         ServerPlayer target = commandContext.getArgument("target", EntitySelector.class).findSinglePlayer(commandContext.getSource());
                         PlayerStatusData targetData = target.getAttached(Attachments.PLAYER_STATUS_DATA);
                         if(targetData.tpa_target() != null && targetData.tpa_target().equals(sender.getUUID()))
-                            target.setAttached(Attachments.PLAYER_STATUS_DATA,new PlayerStatusData(targetData.been_controlled(),targetData.is_controlling(),targetData.location_before_control(),null));
+                            target.setAttached(Attachments.PLAYER_STATUS_DATA,new PlayerStatusData(targetData.been_controlled(),targetData.is_controlling(),targetData.location_before_control(),Optional.empty()));
                         return  0;
                     }))
             .build();

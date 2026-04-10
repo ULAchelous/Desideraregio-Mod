@@ -1,5 +1,6 @@
 package io.ula.drng.config;
 
+import io.ula.drng.Main;
 import net.fabricmc.loader.api.FabricLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,6 +25,10 @@ public class ConfigManager {
         public void run() {
             while(true){
                 try {
+                    ConfigFile MAIN_CONFIG = Main.getConfigManager().getConfig("drng:main");
+                    int period = 60;
+                    if(MAIN_CONFIG != null)
+                        period = MAIN_CONFIG.getKey("autoSavePeriod").getAsInt();
                     Thread.sleep(TimeUnit.MINUTES.toMillis(period));
                 } catch (InterruptedException e) {
                     this.LOGGER.error(e.getMessage());
@@ -40,7 +45,6 @@ public class ConfigManager {
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
     private Thread thread;
     private AutoSave autoSave = new AutoSave();
-    private long period = 60;
     private Logger LOGGER = LogManager.getLogger("dr-ng/ConfigManager");;
     public ConfigManager(){
         thread = new Thread(autoSave,"save");
@@ -56,9 +60,6 @@ public class ConfigManager {
     }
     public void setAutoRemove(String key){
         autoRemove.add(configs.get(key));
-    }
-    public void setAutoSave(long period){
-        this.period = period;
     }
     public ConfigFile getConfig(String key){
         return configs.get(key);

@@ -28,18 +28,19 @@ public class Configs {
 //    public static ConfigFile PLAYER_EULA;
 //    public static ConfigFile CONFIG;
 //    public static InlineConfigFile COMMENTARY;
-    public static void init(Main ownerMod){
+    public static void init(){
         String version = Main.getVersion();
 
         JsonObject mainConfigs = new JsonObject();
         JsonObject log_cmd = new JsonObject();
         mainConfigs.addProperty("version",version);
-        mainConfigs.addProperty("allowCreativeMode",false);
-        mainConfigs.addProperty("balancedOp",true);
+//        mainConfigs.addProperty("allowCreativeMode",false);
+//        mainConfigs.addProperty("balancedOp",true);
+        mainConfigs.addProperty("autoSavePeriod",60);
         log_cmd.addProperty("version",version);
         log_cmd.add("commands",new JsonArray());
 
-        ConfigManager configManager = ownerMod.getConfigManager();
+        ConfigManager configManager = Main.getConfigManager();
          configManager.register("drng:main",new ConfigFile("config.json",null,mainConfigs));
         configManager.register("drng:log_cmd",new ConfigFile("log_cmd.json",ConfigPath.COMMAND,log_cmd));
         configManager.register("drng:titles",new ConfigFile("player_titles.json",ConfigPath.PLAYER,null));

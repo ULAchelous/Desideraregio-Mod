@@ -4,6 +4,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,14 +28,17 @@ public class ServerScheduler {
         return tasks.get(id);
     }
     public void tickable(){
+        ArrayList<String> tasksId = new ArrayList<>();
         for(Map.Entry<String,ScheduleTask> entry : tasks.entrySet()){
             ScheduleTask task = entry.getValue();
             if(task.isCancelled()){
                 LOGGER.info("Removed task \""+task.getId()+"\"");
-                tasks.remove(entry.getKey());
+                tasksId.add(entry.getKey());
                 continue;
             }
             task.tickable();
         }
+        for(String id : tasksId)
+            tasks.remove(id);
     }
 }

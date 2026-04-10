@@ -5,6 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.ula.drng.attachments.Attachments;
 import io.ula.drng.attachments.PlayerStatusData;
+import io.ula.drng.utils.PlayerUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -84,7 +85,7 @@ public class ControlCmd {
                                     .suggests((commandContext, suggestionsBuilder) -> {
                                 for(ServerPlayer player : commandContext.getSource().getServer().getPlayerList().getPlayers()){
                                     //commandContext.getSource().getServer().sendSystemMessage(Component.literal(player.getClass().getSimpleName()));
-                                    if(player.getClass().getSimpleName().equals("EntityPlayerMPFake")){
+                                    if(PlayerUtils.isFakePlayer(player)){
                                         suggestionsBuilder.suggest(player.getName().getString());
                                     }
                                 }
@@ -95,7 +96,7 @@ public class ControlCmd {
                                         String targetName = commandContext.getArgument("bot",String.class);
                                         ServerPlayer target = commandContext.getSource().getServer().getPlayerList().getPlayer(targetName);
 
-                                        if(target != null && target.getClass().getSimpleName().equals("EntityPlayerMPFake")) {
+                                        if(target != null && PlayerUtils.isFakePlayer(target)) {
                                             PlayerStatusData data = target.getAttached(Attachments.PLAYER_STATUS_DATA);
                                             if (data.is_controlling().isPresent()) {
                                                 sender.sendSystemMessage(Component.literal("无法控制(未退出正在进行的控制)").withStyle(ChatFormatting.RED));

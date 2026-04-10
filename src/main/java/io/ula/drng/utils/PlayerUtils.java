@@ -68,4 +68,7 @@ public class PlayerUtils {
 //        if (player.getGameMode().equals(GameMode.SPECTATOR) && !player.isOp())
 //            player.setGameMode(GameMode.SURVIVAL);
     }
+    public static Boolean isFakePlayer(ServerPlayer player){
+        return player.getClass().getSimpleName().equals("EntityPlayerMPFake");
+    }
 }

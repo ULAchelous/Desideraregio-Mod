@@ -73,9 +73,11 @@ public class Main implements ModInitializer {
             ServerScheduler scheduler = ((ServerSchedulerHolder) minecraftServer).drng$getServerSchedule();
             scheduler.runTask(new ScheduleTask("UpdateOnlineTime",() -> {
                 for(ServerPlayer player : minecraftServer.getPlayerList().getPlayers()){
-                    PlayerCntData data = player.getAttached(Attachments.PLAYER_CNT_DATA);
-                    player.setAttached(Attachments.PLAYER_CNT_DATA,new PlayerCntData(data.digCnt(),data.deathCnt(),data.onlineTime()+1));
-                    ScoreBoardHelper.updateScores(player, ScoreBoardHelper.UpdateType.ONLINE_TIME);
+                    if(!PlayerUtils.isFakePlayer(player)) {
+                        PlayerCntData data = player.getAttached(Attachments.PLAYER_CNT_DATA);
+                        player.setAttached(Attachments.PLAYER_CNT_DATA, new PlayerCntData(data.digCnt(), data.deathCnt(), data.onlineTime() + 1));
+                        ScoreBoardHelper.updateScores(player, ScoreBoardHelper.UpdateType.ONLINE_TIME);
+                    }
                 }
             },0,1200));
             scheduler.runTask(new ScheduleTask("DisplayTips",TBUtils::tipsBehaviour,0,30*60*20));
@@ -100,14 +102,18 @@ public class Main implements ModInitializer {
             serverPlayer.sendSystemMessage(TBUtils.getFlowingNoticeBoard());
         });
         PlayerBlockBreakEvents.AFTER.register((level, player, blockPos, blockState, blockEntity) -> {
-            PlayerCntData data = player.getAttached(Attachments.PLAYER_CNT_DATA);
-            player.setAttached(Attachments.PLAYER_CNT_DATA,new PlayerCntData(data.digCnt()+1,data.deathCnt(),data.onlineTime()));
-            ScoreBoardHelper.updateScores((ServerPlayer) player, ScoreBoardHelper.UpdateType.DIG_COUNT);
+            if(!PlayerUtils.isFakePlayer((ServerPlayer) player)) {
+                PlayerCntData data = player.getAttached(Attachments.PLAYER_CNT_DATA);
+                player.setAttached(Attachments.PLAYER_CNT_DATA, new PlayerCntData(data.digCnt() + 1, data.deathCnt(), data.onlineTime()));
+                ScoreBoardHelper.updateScores((ServerPlayer) player, ScoreBoardHelper.UpdateType.DIG_COUNT);
+            }
         });
         ServerPlayerEvents.AFTER_RESPAWN.register((serverPlayer, serverPlayer1, b) -> {
-            PlayerCntData data = serverPlayer.getAttached(Attachments.PLAYER_CNT_DATA);
-            serverPlayer.setAttached(Attachments.PLAYER_CNT_DATA,new PlayerCntData(data.digCnt(),data.deathCnt()+1,data.onlineTime()));
-            ScoreBoardHelper.updateScores(serverPlayer, ScoreBoardHelper.UpdateType.DEATH_COUNT);
+            if(!PlayerUtils.isFakePlayer(serverPlayer)) {
+                PlayerCntData data = serverPlayer.getAttached(Attachments.PLAYER_CNT_DATA);
+                serverPlayer.setAttached(Attachments.PLAYER_CNT_DATA, new PlayerCntData(data.digCnt(), data.deathCnt() + 1, data.onlineTime()));
+                ScoreBoardHelper.updateScores(serverPlayer, ScoreBoardHelper.UpdateType.DEATH_COUNT);
+            }
         });
     }
 

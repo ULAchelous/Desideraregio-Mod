@@ -15,6 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.phys.Vec3;
 
 
 import java.util.Collections;
@@ -23,42 +24,50 @@ import java.util.concurrent.CompletableFuture;
 
 public class ControlCmd {
     public static final LiteralArgumentBuilder<CommandSourceStack> cCmd = Commands.literal("control")
-            .then(Commands.argument("player", EntityArgument.player())
-                    .executes(commandContext -> {
-                        ServerPlayer sender = commandContext.getSource().getPlayer();
-                        ServerPlayer target = commandContext.getArgument("player", EntitySelector.class).findSinglePlayer(commandContext.getSource());
+            .then(Commands.literal("player")
+                    .then(Commands.argument("player", EntityArgument.player())
+                            .executes(commandContext -> {
+                                ServerPlayer sender = commandContext.getSource().getPlayer();
+                                ServerPlayer target = commandContext.getArgument("player", EntitySelector.class).findSinglePlayer(commandContext.getSource());
 
-                        PlayerStatusData data = target.getAttached(Attachments.PLAYER_STATUS_DATA);
-                        if(!data.is_controlling().isEmpty()){
-                            sender.sendSystemMessage(Component.literal("无法控制(未退出正在进行的控制)").withStyle(ChatFormatting.RED));
-                            return 0;
-                        }
-                        if (target.equals(sender)) {
-                            sender.sendSystemMessage(Component.literal("无法控制(对象为自身)").withStyle(ChatFormatting.RED));
-                            return 0;
-                        }
-                        if (target.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
-                            sender.sendSystemMessage(Component.literal("无法控制(对象为Operator)").withStyle(ChatFormatting.RED));
-                            return 0;
-                        }
+                                PlayerStatusData data = target.getAttached(Attachments.PLAYER_STATUS_DATA);
+                                if(data.is_controlling().isPresent()){
+                                    sender.sendSystemMessage(Component.literal("无法控制(未退出正在进行的控制)").withStyle(ChatFormatting.RED));
+                                    return 0;
+                                }
+                                if (target.equals(sender)) {
+                                    sender.sendSystemMessage(Component.literal("无法控制(对象为自身)").withStyle(ChatFormatting.RED));
+                                    return 0;
+                                }
+                                if (target.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
+                                    sender.sendSystemMessage(Component.literal("无法控制(对象为Operator)").withStyle(ChatFormatting.RED));
+                                    return 0;
+                                }
 
-                        sender.setInvisible(true);
+                                sender.setInvisible(true);
+                                sender.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, -1, 0, false, false));
 
-                        target.setAttached(Attachments.PLAYER_STATUS_DATA, new PlayerStatusData(Optional.of(sender.getUUID()),Optional.empty(),Optional.empty(),target.getAttached(Attachments.PLAYER_STATUS_DATA).tpa_target()));//使用元数据标记被控制玩家，存储控制者
-                        sender.setAttached(Attachments.PLAYER_STATUS_DATA,new PlayerStatusData(Optional.empty(),Optional.of(target.getUUID()), Optional.of(sender.position()),sender.getAttached(Attachments.PLAYER_STATUS_DATA).tpa_target()));//使用元数据标记控制玩家，存储被控制者
-                        // 存储控制者控制前的坐标
-                        sender.setPos(target.position());
-                        return 0;
-                    })
-                    .requires(commandSourceStack -> (commandSourceStack.isPlayer() && commandSourceStack.getPlayer().permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)))
-            )
+                                sender.teleportTo(
+                                        target.level(),
+                                        target.getX(), target.getY(), target.getZ(),
+                                        Collections.emptySet(),
+                                        sender.getYRot(),
+                                        sender.getXRot(),
+                                        false
+                                );
+
+                                target.setAttached(Attachments.PLAYER_STATUS_DATA, new PlayerStatusData(Optional.of(sender.getUUID()),Optional.empty(),Optional.empty(),target.getAttached(Attachments.PLAYER_STATUS_DATA).tpa_target()));//使用元数据标记被控制玩家，存储控制者
+                                sender.setAttached(Attachments.PLAYER_STATUS_DATA,new PlayerStatusData(Optional.empty(),Optional.of(target.getUUID()), Optional.of(sender.position()),sender.getAttached(Attachments.PLAYER_STATUS_DATA).tpa_target()));//使用元数据标记控制玩家，存储被控制者
+                                // 存储控制者控制前的坐标
+                                return 0;
+                            })
+                    ).requires(commandSourceStack -> (commandSourceStack.isPlayer() && commandSourceStack.getPlayer().permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))))
             .then(Commands.literal("stop").executes(commandContext -> {
                 ServerPlayer player = commandContext.getSource().getPlayer();
                 PlayerStatusData data = player.getAttached(Attachments.PLAYER_STATUS_DATA);
 
-                if(!data.is_controlling().isEmpty()){
+                if(data.is_controlling().isPresent()){
                     ServerPlayer target = commandContext.getSource().getServer().getPlayerList().getPlayer(data.is_controlling().get());
-                    player.setPos(data.location_before_control().get());
                     player.setAttached(Attachments.PLAYER_STATUS_DATA,new PlayerStatusData(Optional.empty(),Optional.empty(),Optional.empty(),player.getAttached(Attachments.PLAYER_STATUS_DATA).tpa_target()));
                     target.setAttached(Attachments.PLAYER_STATUS_DATA,new PlayerStatusData(Optional.empty(),Optional.empty(),Optional.empty(),target.getAttached(Attachments.PLAYER_STATUS_DATA).tpa_target()));
 
@@ -69,55 +78,60 @@ public class ControlCmd {
                 }
                 return 0;
             }))
-            .then(
-                    Commands.argument("bot", StringArgumentType.string())
-                            .suggests((commandContext, suggestionsBuilder) -> {
+            .then(Commands.literal("bot")
+                    .then(
+                            Commands.argument("bot", StringArgumentType.string())
+                                    .suggests((commandContext, suggestionsBuilder) -> {
                                 for(ServerPlayer player : commandContext.getSource().getServer().getPlayerList().getPlayers()){
+                                    //commandContext.getSource().getServer().sendSystemMessage(Component.literal(player.getClass().getSimpleName()));
                                     if(player.getClass().getSimpleName().equals("EntityPlayerMPFake")){
                                         suggestionsBuilder.suggest(player.getName().getString());
                                     }
                                 }
-                                return CompletableFuture.completedFuture(suggestionsBuilder.build());
-                            })
-                            .executes(commandContext -> {
-                                ServerPlayer sender = commandContext.getSource().getPlayer();
-                                String targetName = commandContext.getArgument("bot",String.class);
-                                ServerPlayer target = commandContext.getSource().getServer().getPlayerList().getPlayer(targetName);
+                                        return CompletableFuture.completedFuture(suggestionsBuilder.build());
+                                    })
+                                    .executes(commandContext -> {
+                                        ServerPlayer sender = commandContext.getSource().getPlayer();
+                                        String targetName = commandContext.getArgument("bot",String.class);
+                                        ServerPlayer target = commandContext.getSource().getServer().getPlayerList().getPlayer(targetName);
 
-                                if(target != null) {
-                                    PlayerStatusData data = target.getAttached(Attachments.PLAYER_STATUS_DATA);
-                                    if (!data.is_controlling().isEmpty()) {
-                                        sender.sendSystemMessage(Component.literal("无法控制(未退出正在进行的控制)").withStyle(ChatFormatting.RED));
-                                        return 0;
-                                    }
-                                    if (target.equals(sender)) {
-                                        sender.sendSystemMessage(Component.literal("无法控制(对象为自身)").withStyle(ChatFormatting.RED));
-                                        return 0;
-                                    }
-                                    if (target.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
-                                        sender.sendSystemMessage(Component.literal("无法控制(对象为Operator)").withStyle(ChatFormatting.RED));
-                                        return 0;
-                                    }
+                                        if(target != null && target.getClass().getSimpleName().equals("EntityPlayerMPFake")) {
+                                            PlayerStatusData data = target.getAttached(Attachments.PLAYER_STATUS_DATA);
+                                            if (data.is_controlling().isPresent()) {
+                                                sender.sendSystemMessage(Component.literal("无法控制(未退出正在进行的控制)").withStyle(ChatFormatting.RED));
+                                                return 0;
+                                            }
+                                            if (target.equals(sender)) {
+                                                sender.sendSystemMessage(Component.literal("无法控制(对象为自身)").withStyle(ChatFormatting.RED));
+                                                return 0;
+                                            }
+                                            if (target.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
+                                                sender.sendSystemMessage(Component.literal("无法控制(对象为Operator)").withStyle(ChatFormatting.RED));
+                                                return 0;
+                                            }
 
-                                    sender.setInvisible(true);
-                                    sender.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, -1, 0, false, false));
+                                            sender.setInvisible(true);
+                                            sender.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, -1, 0, false, false));
 
-                                    target.setAttached(Attachments.PLAYER_STATUS_DATA, new PlayerStatusData(Optional.of(sender.getUUID()), Optional.empty(), Optional.empty(), target.getAttached(Attachments.PLAYER_STATUS_DATA).tpa_target()));//使用元数据标记被控制玩家，存储控制者
-                                    sender.setAttached(Attachments.PLAYER_STATUS_DATA, new PlayerStatusData(Optional.empty(), Optional.of(target.getUUID()), Optional.of(sender.position()), sender.getAttached(Attachments.PLAYER_STATUS_DATA).tpa_target()));//使用元数据标记控制玩家，存储被控制者
-                                    // 存储控制者控制前的坐标
-                                    sender.teleportTo(
-                                            target.level(),
-                                            target.getX(), target.getY(), target.getZ(),
-                                            Collections.emptySet(),
-                                            sender.getYRot(),
-                                            sender.getXRot(),
-                                            false
-                                    );
-                                }
-                                return 0;
-                            })
-                            .requires(commandSourceStack -> (commandSourceStack.isPlayer() && !commandSourceStack.getPlayer().permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) && !commandSourceStack.getPlayer().permissions().hasPermission(Permissions.COMMANDS_ADMIN) && !commandSourceStack.getPlayer().permissions().hasPermission(Permissions.COMMANDS_MODERATOR) && !commandSourceStack.getPlayer().permissions().hasPermission(Permissions.COMMANDS_OWNER)))
-            );
+                                            sender.teleportTo(
+                                                    target.level(),
+                                                    target.getX(), target.getY(), target.getZ(),
+                                                    Collections.emptySet(),
+                                                    sender.getYRot(),
+                                                    sender.getXRot(),
+                                                    false
+                                            );
+
+                                            target.setAttached(Attachments.PLAYER_STATUS_DATA, new PlayerStatusData(Optional.of(sender.getUUID()), Optional.empty(), Optional.empty(), target.getAttached(Attachments.PLAYER_STATUS_DATA).tpa_target()));//使用元数据标记被控制玩家，存储控制者
+                                            sender.setAttached(Attachments.PLAYER_STATUS_DATA, new PlayerStatusData(Optional.empty(), Optional.of(target.getUUID()), Optional.of(sender.position()), sender.getAttached(Attachments.PLAYER_STATUS_DATA).tpa_target()));//使用元数据标记控制玩家，存储被控制者
+                                            // 存储控制者控制前的坐标
+                                        }else{
+                                            sender.sendSystemMessage(Component.literal("无法控制(玩家不存在或无权控制)").withStyle(ChatFormatting.RED));
+                                        }
+                                        return 0;
+                                    })
+                    ))
+;
 
     public static final LiteralCommandNode<CommandSourceStack> buildCCmd = cCmd.build();
 }

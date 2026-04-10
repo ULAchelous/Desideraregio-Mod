@@ -67,7 +67,7 @@ public class ServerGamePacketListenerMixin {
     private void movementInject(CallbackInfo ci){
         ServerPlayer sender = this.player;
         PlayerStatusData data = sender.getAttached(Attachments.PLAYER_STATUS_DATA);
-        if(data!=null&& !data.is_controlling().isEmpty()){
+        if(data!=null&& data.is_controlling().isPresent()){
             ServerPlayer target = this.server.getPlayerList().getPlayer(data.is_controlling().get());
 
             ClientboundSetActionBarTextPacket controllerPacket = new ClientboundSetActionBarTextPacket(Component.literal(String.format("你正在控制%s!", target.getName().getString())).withStyle(ChatFormatting.RED));

@@ -77,7 +77,7 @@ public class TpaCmd {
                         ServerPlayer sender = commandContext.getSource().getPlayer();
                         ServerPlayer target = commandContext.getArgument("target", EntitySelector.class).findSinglePlayer(commandContext.getSource());
                         PlayerStatusData targetData = target.getAttached(Attachments.PLAYER_STATUS_DATA);
-                        if(targetData.tpa_target() != null && targetData.tpa_target().equals(sender.getUUID())) {
+                        if(targetData.tpa_target().isPresent() && targetData.tpa_target().get().equals(sender.getUUID())) {
                             serverScheduler.getTask(target.getName().getString()+"TpaTimeOut").cancel();
                             target.teleportTo(
                                     sender.level(),
@@ -98,9 +98,11 @@ public class TpaCmd {
                         ServerPlayer sender = commandContext.getSource().getPlayer();
                         ServerPlayer target = commandContext.getArgument("target", EntitySelector.class).findSinglePlayer(commandContext.getSource());
                         PlayerStatusData targetData = target.getAttached(Attachments.PLAYER_STATUS_DATA);
-                        if(targetData.tpa_target() != null && targetData.tpa_target().equals(sender.getUUID()))
-                            target.setAttached(Attachments.PLAYER_STATUS_DATA,new PlayerStatusData(targetData.been_controlled(),targetData.is_controlling(),targetData.location_before_control(),Optional.empty()));
-                        return  0;
+                        if(targetData.tpa_target().isPresent() && targetData.tpa_target().get().equals(sender.getUUID())) {
+                            target.setAttached(Attachments.PLAYER_STATUS_DATA, new PlayerStatusData(targetData.been_controlled(), targetData.is_controlling(), targetData.location_before_control(), Optional.empty()));
+                            target.sendSystemMessage(Component.literal("你被拒绝了！").withStyle(ChatFormatting.RED));
+                        }
+                            return  0;
                     }))
             .build();
     public static LiteralCommandNode<CommandSourceStack> tpaCmd = tpaCmdBuilder.build();

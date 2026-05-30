@@ -31,10 +31,11 @@ import java.nio.file.Path;
 public class Main implements ModInitializer {
 
     public static final CustomChatDecorator CUSTOM_CHAT_DECORATOR = new CustomChatDecorator();
-    public static final String VERSION = FabricLoader.getInstance().getModContainer("dr-ng").get().getMetadata().getVersion().toString();
+    public static final String MOD_ID = "dr-ng";
+    public static final String VERSION = FabricLoader.getInstance().getModContainer(MOD_ID).get().getMetadata().getVersion().toString();
     public static final Path SERVER_ROOT = FabricLoader.getInstance().getGameDir();
     public static final Path CONFIG_PATH = Path.of(new File(SERVER_ROOT.toString() + "/config/dr-ng").toURI());
-    private static ConfigManager configManager;
+    private static ConfigManager configManager = new ConfigManager(MOD_ID,VERSION,SERVER_ROOT);
     public static ConfigManager getConfigManager() {
         return configManager;
     }
@@ -42,7 +43,6 @@ public class Main implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        configManager = new ConfigManager("dr-ng",VERSION,CONFIG_PATH);
         Configs.init();
         commandsRegister();
         callbackRegister();

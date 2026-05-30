@@ -24,7 +24,7 @@
   },
   "jars": [
     {
-      "file": "META-INF/jars/config-engine-0.26.15.jar"
+      "file": "libs/java/ConfigEngine-0.26.530-all.jar"
     }
   ]
 }

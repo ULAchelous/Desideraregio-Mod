@@ -47,8 +47,8 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:0.141.3+1.21.11"
 
-    implementation files("libs/ConfigEngine-0.26.15-all.jar")
-    include files("libs/ConfigEngine-0.26.15-all.jar")
+    implementation files("libs/ConfigEngine-0.26.530-all.jar")
+    include files("libs/ConfigEngine-0.26.530-all.jar")
 }
 
 processResources {

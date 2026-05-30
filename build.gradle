@@ -37,6 +37,10 @@ repositories {
     // See https://docs.gradle.org/current/userguide/declaring_repositories.html
     // for more information about repositories.
     mavenLocal()
+
+    flatDir {
+        dir 'libs'
+    }
 }
 
 dependencies {
@@ -47,8 +51,8 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:0.141.3+1.21.11"
 
-    implementation files("libs/ConfigEngine-0.26.530-all.jar")
-    include files("libs/ConfigEngine-0.26.530-all.jar")
+    implementation name: 'ConfigEngine-0.26.530'
+    include name: 'ConfigEngine-0.26.530'
 }
 
 processResources {

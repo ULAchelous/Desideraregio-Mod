@@ -4,10 +4,9 @@
   "version": "${version}",
   "name": "Desideraregio - Mod",
   "description": "Desideraregio - Next基本模组",
-  "authors": [],
+  "authors": ["_Achelous"],
   "contact": {},
   "license": "GPL-3.0",
-  "icon": "assets/dr-ng/icon.png",
   "environment": "server",
   "entrypoints": {
     "main": [

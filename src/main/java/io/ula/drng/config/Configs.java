@@ -3,11 +3,12 @@ package io.ula.drng.config;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.ula.drng.Main;
+import io.ula.config.*;
 import net.fabricmc.loader.api.FabricLoader;
 
 
 
-public class Configs {
+public class  Configs {
     public static class ConfigPath{
         public static final String PLAYER = "player";
         public static final String PERMISSION = "permission";

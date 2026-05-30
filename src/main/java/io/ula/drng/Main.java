@@ -1,14 +1,12 @@
 package io.ula.drng;
 
 import com.mojang.brigadier.tree.RootCommandNode;
+import io.ula.config.*;
 import io.ula.drng.attachments.Attachments;
 import io.ula.drng.attachments.PlayerCntData;
 import io.ula.drng.chatdecorators.CustomChatDecorator;
 import io.ula.drng.commands.*;
-import io.ula.drng.config.ConfigFile;
-import io.ula.drng.config.ConfigManager;
 import io.ula.drng.config.Configs;
-import io.ula.drng.config.InlineConfigFile;
 import io.ula.drng.dialog.CustomDialogs;
 import io.ula.drng.scheduler.ScheduleTask;
 import io.ula.drng.scheduler.ServerScheduler;
@@ -23,18 +21,19 @@ import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.common.ClientboundShowDialogPacket;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+
+import java.io.File;
+import java.nio.file.Path;
 
 
 public class Main implements ModInitializer {
 
     public static final CustomChatDecorator CUSTOM_CHAT_DECORATOR = new CustomChatDecorator();
     public static final String VERSION = FabricLoader.getInstance().getModContainer("dr-ng").get().getMetadata().getVersion().toString();
-
+    public static final Path SERVER_ROOT = FabricLoader.getInstance().getGameDir();
+    public static final Path CONFIG_PATH = Path.of(new File(SERVER_ROOT.toString() + "/config/dr-ng").toURI());
     private static ConfigManager configManager;
     public static ConfigManager getConfigManager() {
         return configManager;
@@ -43,7 +42,7 @@ public class Main implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        configManager = new ConfigManager();
+        configManager = new ConfigManager("dr-ng",VERSION,CONFIG_PATH);
         Configs.init();
         commandsRegister();
         callbackRegister();

@@ -1,25 +1,16 @@
 package io.ula.drng.dialog;
 
-import com.mojang.serialization.MapCodec;
 import io.ula.drng.Main;
-import io.ula.drng.config.InlineConfigFile;
-import net.minecraft.commands.functions.StringTemplate;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.ClickEvent;
+import io.ula.config.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.dialog.*;
 import net.minecraft.server.dialog.action.*;
-import net.minecraft.server.dialog.body.DialogBody;
-import net.minecraft.server.dialog.body.DialogBodyTypes;
 import net.minecraft.server.dialog.body.PlainMessage;
-import net.minecraft.server.dialog.input.InputControl;
-import net.minecraft.server.dialog.input.InputControlTypes;
 import net.minecraft.server.dialog.input.SingleOptionInput;
 import net.minecraft.server.dialog.input.TextInput;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class CustomDialogs {

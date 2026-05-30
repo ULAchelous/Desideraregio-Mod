@@ -83,12 +83,12 @@ public class ControlCmd {
                     .then(
                             Commands.argument("bot", StringArgumentType.string())
                                     .suggests((commandContext, suggestionsBuilder) -> {
-                                for(ServerPlayer player : commandContext.getSource().getServer().getPlayerList().getPlayers()){
+                                        for(ServerPlayer player : commandContext.getSource().getServer().getPlayerList().getPlayers()){
                                     //commandContext.getSource().getServer().sendSystemMessage(Component.literal(player.getClass().getSimpleName()));
-                                    if(PlayerUtils.isFakePlayer(player)){
-                                        suggestionsBuilder.suggest(player.getName().getString());
-                                    }
-                                }
+                                            if(PlayerUtils.isFakePlayer(player)){
+                                                suggestionsBuilder.suggest(player.getName().getString());
+                                            }
+                                        }
                                         return CompletableFuture.completedFuture(suggestionsBuilder.build());
                                     })
                                     .executes(commandContext -> {

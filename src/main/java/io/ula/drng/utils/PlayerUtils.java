@@ -3,11 +3,10 @@ package io.ula.drng.utils;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import io.ula.drng.Main;
+import io.ula.config.*;
 import io.ula.drng.attachments.Attachments;
 import io.ula.drng.attachments.PlayerCntData;
 import io.ula.drng.attachments.PlayerStatusData;
-import io.ula.drng.config.ConfigFile;
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.server.level.ServerPlayer;
@@ -15,14 +14,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 
-
-
-import java.awt.*;
 import java.util.Optional;
 
 
 public class PlayerUtils {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger("dr-ng");
     public static Component getPlayerTitles(String playerName) {
         Component component = Component.empty();
         ConfigFile PLAYER_TITLES = Main.getConfigManager().getConfig("drng:titles");

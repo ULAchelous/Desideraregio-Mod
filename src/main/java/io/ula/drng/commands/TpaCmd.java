@@ -34,7 +34,6 @@ public class TpaCmd {
             .then(Commands.argument("target", EntityArgument.player()).executes(context -> {
                 ServerPlayer sendr = (ServerPlayer) context.getSource().getPlayer();
                 ServerPlayer target = context.getArgument("target", EntitySelector.class).findSinglePlayer(context.getSource());
-
                 ServerScheduler serverScheduler = ((ServerSchedulerHolder)context.getSource().getServer()).drng$getServerSchedule();
                 serverScheduler.runTask(new ScheduleTask(sendr.getName().getString() + "TpaTimeOut",() -> {
                     sendr.sendSystemMessage(Component.literal("传送请求超时").withStyle(ChatFormatting.RED));

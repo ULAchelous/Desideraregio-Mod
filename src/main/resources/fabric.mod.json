@@ -21,5 +21,10 @@
   "depends": {
     "fabricloader": ">=${loader_version}",
     "minecraft": "${minecraft_version}"
-  }
+  },
+  "jars": [
+    {
+      "file": "META-INF/jars/config-engine-0.26.15.jar"
+    }
+  ]
 }

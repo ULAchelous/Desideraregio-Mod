@@ -5,14 +5,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import io.ula.drng.Main;
-import io.ula.drng.config.ConfigFile;
+import io.ula.config.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.contents.ObjectContents;
 import net.minecraft.network.chat.contents.objects.PlayerSprite;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -20,9 +18,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.Level;
-import org.spongepowered.tools.obfuscation.mirror.mapping.MappingMethodResolvable;
 
-import java.time.Duration;
 import java.util.Random;
 import java.util.UUID;
 
@@ -96,8 +92,7 @@ public class TBUtils {
         if(NOTICE.has("notices")){
             for(JsonElement element : NOTICE.getKey("notices").getAsJsonArray()){
                 JsonObject jsonObject = element.getAsJsonObject();
-                nb = nb.copy().append(Component.literal(jsonObject.get("author").getAsString()).withStyle(ChatFormatting.GRAY))
-                        .append(Component.literal(":"))
+                nb = nb.copy().append(Component.literal(jsonObject.get("author").getAsString()).withStyle(ChatFormatting.GRAY).append(Component.literal(":")))
                         .append(" ")
                         .append(Component.literal(jsonObject.get("title").getAsString()))
                         .append("\n");

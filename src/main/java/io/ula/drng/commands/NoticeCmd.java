@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.ula.drng.Main;
-import io.ula.drng.config.ConfigFile;
+import io.ula.config.*;
 import io.ula.drng.dialog.CustomDialogs;
 import io.ula.drng.scheduler.ScheduleTask;
 import io.ula.drng.scheduler.ServerSchedulerHolder;
@@ -40,7 +40,7 @@ public class NoticeCmd {
                         ((ServerSchedulerHolder)commandContext.getSource().getServer()).drng$getServerSchedule().runTask(new ScheduleTask(sender.getName().getString()+"replaceItem",() -> {
                             sender.connection.send(new ClientboundOpenBookPacket(InteractionHand.MAIN_HAND));
                             sender.setItemInHand(InteractionHand.MAIN_HAND,is);
-                        },10));
+                        },5));
                         return 0;
                     }
             ))

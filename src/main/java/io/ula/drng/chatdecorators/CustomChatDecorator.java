@@ -3,7 +3,7 @@ package io.ula.drng.chatdecorators;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import io.ula.drng.Main;
-import io.ula.drng.config.ConfigFile;
+import io.ula.config.*;
 import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;

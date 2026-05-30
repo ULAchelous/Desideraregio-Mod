@@ -4,13 +4,11 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.ula.drng.Main;
-import io.ula.drng.config.ConfigFile;
-import io.ula.drng.config.ConfigManager;
+import io.ula.config.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.dialog.Dialog;
 import net.minecraft.server.permissions.Permissions;
 
 public class ConfigCmd {

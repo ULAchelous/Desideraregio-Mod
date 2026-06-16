@@ -51,8 +51,7 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:0.141.3+1.21.11"
 
-    modImplementation name: 'ConfigEngine-0.26.530-all'
-    include name: 'ConfigEngine-0.26.530-all'
+    modImplementation name: 'ULA-API-1.26.616'
 }
 
 processResources {

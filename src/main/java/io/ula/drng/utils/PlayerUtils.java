@@ -3,7 +3,7 @@ package io.ula.drng.utils;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import io.ula.drng.Main;
-import io.ula.config.*;
+import io.ula.api.config.*;
 import io.ula.drng.attachments.Attachments;
 import io.ula.drng.attachments.PlayerCntData;
 import io.ula.drng.attachments.PlayerStatusData;

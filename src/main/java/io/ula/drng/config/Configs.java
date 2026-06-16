@@ -2,8 +2,10 @@ package io.ula.drng.config;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import io.ula.api.config.ConfigFile;
+import io.ula.api.config.ConfigManager;
+import io.ula.api.config.InlineConfigFile;
 import io.ula.drng.Main;
-import io.ula.config.*;
 import net.fabricmc.loader.api.FabricLoader;
 
 

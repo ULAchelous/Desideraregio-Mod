@@ -148,3 +148,7 @@ public class ScoreBoardHelper {
         ONLINE_TIME
     }
 }
+
+/*
+石，除非我想重构、否则不要动。
+ */

@@ -45,7 +45,7 @@ public class  Configs {
 
         ConfigManager configManager = Main.getConfigManager();
          configManager.register("drng:main",new ConfigFile("config.json",null,mainConfigs));
-        configManager.register("drng:log_cmd",new ConfigFile("log_cmd.json",ConfigPath.COMMAND,log_cmd));
+        //configManager.register("drng:log_cmd",new ConfigFile("log_cmd.json",ConfigPath.COMMAND,log_cmd));
         configManager.register("drng:titles",new ConfigFile("player_titles.json",ConfigPath.PLAYER,null));
         configManager.register("drng:tips",new ConfigFile("tips.json",ConfigPath.TALKBAR,null));
         configManager.register("drng:notices",new ConfigFile("notices.json",ConfigPath.NOTICE,null));

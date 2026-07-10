@@ -107,10 +107,13 @@ public class ScoreBoardHelper {
     public static void removeObjective(ServerPlayer player) {
         objectives.remove(player.getUUID());
     }
-    private static String getOnlineTime(int time){
+    private static String getOnlineTime(int time,String local){
         int hour = time / 60;
         int minute = time % 60;
-        return String.format("§e%d§r小时§e%d§r分钟",hour,minute);
+        if(local.equals("zh_cn"))
+            return String.format("§e%d§r小时§e%d§r分钟",hour,minute);
+        else
+            return String.format("§e%d§rH§e%d§rM",hour,minute);
     }
 
     public static void updateScores(ServerPlayer player,UpdateType type) {
@@ -131,7 +134,7 @@ public class ScoreBoardHelper {
                     sendScore2Player(player, "digCnt", objective, c2, BlankFormat.INSTANCE, 3);
                     break;
                 case ONLINE_TIME:
-                    Component c3 = Component.literal("在线时长: ").append(Component.literal(getOnlineTime(((int) playerCntData.onlineTime()))).withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD));
+                    Component c3 = Component.literal("在线时长: ").append(Component.literal(getOnlineTime(((int) playerCntData.onlineTime()),local)).withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD));
                     sendScore2Player(player, "onlineTime", objective, c3, BlankFormat.INSTANCE, 3);
                     break;
             }
@@ -146,7 +149,7 @@ public class ScoreBoardHelper {
                     sendScore2Player(player, "digCnt", objective, c2, BlankFormat.INSTANCE, 3);
                     break;
                 case ONLINE_TIME:
-                    Component c3 = Component.literal("Online: ").append(Component.literal(getOnlineTime(((int) playerCntData.onlineTime()))).withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD));
+                    Component c3 = Component.literal("Online: ").append(Component.literal(getOnlineTime(((int) playerCntData.onlineTime()),local)).withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD));
                     sendScore2Player(player, "onlineTime", objective, c3, BlankFormat.INSTANCE, 3);
                     break;
             }

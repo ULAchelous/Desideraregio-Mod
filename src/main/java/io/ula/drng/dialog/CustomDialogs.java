@@ -20,6 +20,7 @@ import net.minecraft.server.dialog.body.PlainMessage;
 import net.minecraft.server.dialog.input.SingleOptionInput;
 import net.minecraft.server.dialog.input.TextInput;
 import net.minecraft.server.level.ServerPlayer;
+import org.apache.logging.log4j.LogManager;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -40,12 +41,14 @@ public class CustomDialogs {
             .actions(List.of(
 
                     new Button(new CommonButtonData(Component.literal("同意"),180),new CustomAll(Identifier.tryBuild("drng","eula/accept"),Optional.empty()),(serverPlayer,packet) -> {
+                        LogManager.getLogger("test").info("example");
                         ConfigFile PLAYER_EULA = Main.getConfigManager().getConfig("drng:eula");
                         PLAYER_EULA.addKey(serverPlayer.getStringUUID(),true);
                     }),
                     new Button(new CommonButtonData(Component.literal("拒绝"),180),new CustomAll(Identifier.tryBuild("drng","eula/reject"),Optional.empty()),(serverPlayer,packet) -> serverPlayer.connection.disconnect(Component.literal("未同意许可").withStyle(ChatFormatting.RED)))
                     )
             )
+
             .build();
 
 
@@ -97,6 +100,67 @@ public class CustomDialogs {
                                                     Component.literal("公告栏上有新的信息，点击查看")
                                                             .setStyle(Style.EMPTY.withClickEvent(new ClickEvent.RunCommand("/notice list")).applyFormat(ChatFormatting.GREEN))
                                             );
+                                        }
+                                    }
+                                }
+                            })
+                    )
+            )
+            .cancellable(true)
+            .build();
+    public static final Dialog NEW_NOTICE_DIALOG_EN = new DialogBuilder(Component.literal("发布公告"))
+            .inputs(
+                    List.of(
+                            new Input("author",new TextInput(500,Component.literal("Author"),true,"",10,Optional.empty())),
+                            new Input("title",new TextInput(500,Component.literal("Description"),true,"",20,Optional.empty())),
+                            new Input("text",new TextInput(500,Component.literal("Body"),true,"",131,Optional.of(new TextInput.MultilineOptions(Optional.of(512),Optional.of(512))))),
+                            new Input("time_limit",new SingleOptionInput(130,List.of(
+                                    new SingleOptionInput.Entry("1",Optional.of(Component.literal("1 day")),true),
+                                    new SingleOptionInput.Entry("5",Optional.of(Component.literal("5 day")),false),
+                                    new SingleOptionInput.Entry("30",Optional.of(Component.literal("30 day")),false)
+                            ),Component.literal("时间限制"),true))
+                    )
+            )
+            .actions(
+                    List.of(
+                            new Button(new CommonButtonData(Component.literal("publish"),180),new CustomAll(Identifier.tryBuild("drng","notice/boardcast"),Optional.empty()),(player,packet) -> {
+                                if(packet.payload().get() instanceof CompoundTag compoundTag) {
+                                    ConfigFile NOTICES = Main.getConfigManager().getConfig("drng:notices");
+                                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
+                                            .withZone(ZoneId.of("Asia/Shanghai"));
+                                    JsonObject notice = new JsonObject();
+                                    String author = compoundTag.get("author").asString().get();
+                                    String title = compoundTag.get("title").asString().get();
+                                    String text = compoundTag.get("text").asString().get();
+                                    String time_limit = compoundTag.get("time_limit").asString().get();
+                                    if (author.isEmpty() || title.isEmpty() || text.isEmpty()) {
+                                        player.sendSystemMessage(Component.literal("Announcement not sent: Missing required fields.").withStyle(ChatFormatting.RED));
+                                    } else {
+                                        notice.addProperty("author", author);
+                                        notice.addProperty("title", title);
+                                        notice.addProperty("text", text);
+                                        notice.addProperty("created_time", formatter.format(LocalDate.now(ZoneId.of("Asia/Shanghai"))));
+                                        notice.addProperty("deadline", formatter.format(LocalDate.now(ZoneId.of("Asia/Shanghai")).plusDays(Integer.parseInt(time_limit))));
+
+                                        if (NOTICES.has("notices")) {
+                                            NOTICES.getKey("notices").getAsJsonArray().add(notice);
+                                        } else {
+                                            NOTICES.addKey("notices", new JsonArray());
+                                            NOTICES.getKey("notices").getAsJsonArray().add(notice);
+                                        }
+                                        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+                                            String local = p.clientInformation().language();
+                                            if(local.equals("zh_cn")) {
+                                                p.sendSystemMessage(
+                                                        Component.literal("公告栏上有新的信息，点击查看")
+                                                                .setStyle(Style.EMPTY.withClickEvent(new ClickEvent.RunCommand("/notice list")).applyFormat(ChatFormatting.GREEN))
+                                                );
+                                            }else{
+                                                p.sendSystemMessage(
+                                                        Component.literal("Click to view the new information on the notice bar.")
+                                                                .setStyle(Style.EMPTY.withClickEvent(new ClickEvent.RunCommand("/notice list")).applyFormat(ChatFormatting.GREEN))
+                                                );
+                                            }
                                         }
                                     }
                                 }

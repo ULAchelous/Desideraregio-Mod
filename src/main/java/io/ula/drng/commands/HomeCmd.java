@@ -30,6 +30,7 @@ public class HomeCmd {
                     .then(Commands.argument("id", StringArgumentType.string())
                             .executes(context -> {
                                 ServerPlayer sender = context.getSource().getPlayer();
+                                String local = sender.clientInformation().language();
                                 String senderName = sender.getName().getString();
                                 String id = context.getArgument("id",String.class);
                                 ConfigFile PLAYER_HOMES = Main.getConfigManager().getConfig("drng:homes");
@@ -41,7 +42,10 @@ public class HomeCmd {
                                 for(JsonElement element : PLAYER_HOMES.getKey(senderName).getAsJsonArray())
                                     if(!element.getAsJsonObject().has("removed")) num++;
                                 if(num > PLAYER_HOMES.getKey("maxCount").getAsInt()){
-                                    sender.sendSystemMessage(Component.literal("标记点数量到达上限").withStyle(ChatFormatting.RED));
+                                    if(local.equals("zh_cn"))
+                                        sender.sendSystemMessage(Component.literal("标记点数量到达上限").withStyle(ChatFormatting.RED));
+                                    else
+                                        sender.sendSystemMessage(Component.literal("Out of limit").withStyle(ChatFormatting.RED));
                                     return 0;
                                 }
                                 JsonObject marker = new JsonObject();
@@ -49,7 +53,10 @@ public class HomeCmd {
                                 marker.addProperty("location",LocationSerializer(sender.position()));
                                 marker.addProperty("level",sender.level().dimensionTypeRegistration().getRegisteredName());
                                 PLAYER_HOMES.getKey(senderName).getAsJsonArray().add(marker);
-                                sender.sendSystemMessage(Component.literal("添加成功").withStyle(ChatFormatting.GREEN));
+                                if(local.equals("zh_cn"))
+                                    sender.sendSystemMessage(Component.literal("添加成功").withStyle(ChatFormatting.GREEN));
+                                else
+                                    sender.sendSystemMessage(Component.literal("Success").withStyle(ChatFormatting.GREEN));
                                 return 0;
                             })
                     )
@@ -57,7 +64,11 @@ public class HomeCmd {
             .then(Commands.literal("remove")
                     .executes(context -> {
                         ServerPlayer sender = context.getSource().getPlayer();
-                        sender.sendSystemMessage(Component.literal("点击标记点以删除它！"));
+                        String local = sender.clientInformation().language();
+                        if(local.equals("zh_cn"))
+                            sender.sendSystemMessage(Component.literal("点击标记点以删除它！"));
+                        else
+                            sender.sendSystemMessage(Component.literal("Click to remove!"));
                         sender.sendSystemMessage(getPlayerHomes(sender,true));
                         return 0;
                     })
@@ -65,7 +76,11 @@ public class HomeCmd {
             .then(Commands.literal("tp")
                     .executes(context -> {
                         ServerPlayer sender = context.getSource().getPlayer();
-                        sender.sendSystemMessage(Component.literal("点击标记点以传送！"));
+                        String local = sender.clientInformation().language();
+                        if(local.equals("zh_cn"))
+                            sender.sendSystemMessage(Component.literal("点击标记点以传送！"));
+                        else
+                            sender.sendSystemMessage(Component.literal("Click to teleport"));
                         sender.sendSystemMessage(getPlayerHomes(sender,false));
                         return 0;
                     })
@@ -77,11 +92,15 @@ public class HomeCmd {
             .then(Commands.argument("index", IntegerArgumentType.integer())
                     .executes(commandContext -> {
                         ServerPlayer sender = commandContext.getSource().getPlayer();
+                        String local = sender.clientInformation().language();
                         int index = commandContext.getArgument("index", Integer.class);
                         ConfigFile PLAYER_HOMES = Main.getConfigManager().getConfig("drng:homes");
                         JsonElement element = PLAYER_HOMES.getKey(sender.getName().getString()).getAsJsonArray().get(index);
                         element.getAsJsonObject().addProperty("removed",true);
-                        sender.sendSystemMessage(Component.literal("删除了 ").append(Component.literal(Integer.toString(index)).withStyle(ChatFormatting.YELLOW)).append(" 号"));
+                        if(local.equals("zh_cn"))
+                            sender.sendSystemMessage(Component.literal("删除了 ").append(Component.literal(Integer.toString(index)).withStyle(ChatFormatting.YELLOW)).append(" 号"));
+                        else
+                            sender.sendSystemMessage(Component.literal("Removed ").append(Component.literal("No. ")).append(Component.literal(Integer.toString(index)).withStyle(ChatFormatting.YELLOW)));
                         return 0;
                     })
             )

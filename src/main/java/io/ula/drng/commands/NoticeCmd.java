@@ -35,8 +35,9 @@ public class NoticeCmd {
             .then(Commands.literal("list")
                     .executes(commandContext -> {
                         ServerPlayer sender = commandContext.getSource().getPlayer();
+                        String local = sender.clientInformation().language();
                         ItemStack is = sender.getItemInHand(InteractionHand.MAIN_HAND);
-                        sender.setItemInHand(InteractionHand.MAIN_HAND,getNoticeBook());
+                        sender.setItemInHand(InteractionHand.MAIN_HAND,getNoticeBook(local));
                         ((ServerSchedulerHolder)commandContext.getSource().getServer()).drng$getServerSchedule().runTask(new ScheduleTask(sender.getName().getString()+"replaceItem",() -> {
                             sender.connection.send(new ClientboundOpenBookPacket(InteractionHand.MAIN_HAND));
                             sender.setItemInHand(InteractionHand.MAIN_HAND,is);
@@ -47,7 +48,8 @@ public class NoticeCmd {
             .then(Commands.literal("write")
                     .executes(context -> {
                         ServerPlayer sender = context.getSource().getPlayer();
-                        ClientboundShowDialogPacket packet = new ClientboundShowDialogPacket(Holder.direct(CustomDialogs.NEW_NOTICE_DIALOG));
+                        String local = sender.clientInformation().language();
+                        ClientboundShowDialogPacket packet = local.equals("zh_cn")? new ClientboundShowDialogPacket(Holder.direct(CustomDialogs.NEW_NOTICE_DIALOG)) : new ClientboundShowDialogPacket(Holder.direct(CustomDialogs.NEW_NOTICE_DIALOG_EN));
                         sender.connection.send(packet);
                         return 0;
                     })
@@ -57,7 +59,7 @@ public class NoticeCmd {
 
     public static LiteralCommandNode<CommandSourceStack> PRNCmd = Commands.literal("player-write-notice")
             .build();
-    public static ItemStack getNoticeBook(){
+    public static ItemStack getNoticeBook(String local){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
                 .withZone(ZoneId.of("Asia/Shanghai"));
 
@@ -77,20 +79,36 @@ public class NoticeCmd {
                     DRNG_NOTICES.getKey("notices").getAsJsonArray().set(i,notice);
                     continue;
                 }
-                Component page = Component.empty()
-                        .append( Component.literal("发布者: ").withStyle(ChatFormatting.GRAY,ChatFormatting.BOLD))
-                        .append( Component.literal(author))
-                        .append("\n")
-                        .append(title)
-                        .append("。")
-                        .append( Component.literal(content))
-                        .append("\n")
-                        .append( Component.literal("发布时间：").withStyle(ChatFormatting.GRAY,ChatFormatting.BOLD))
-                        .append( Component.literal(notice.getAsJsonObject().get("created_time").getAsString()))
-                        .append("\n")
-                        .append( Component.literal("截止时间：").withStyle(ChatFormatting.GRAY,ChatFormatting.BOLD))
-                        .append( Component.literal(notice.getAsJsonObject().get("deadline").getAsString()));
-
+                Component page;
+                if(local.equals("zh_cn")) {
+                    page = Component.empty()
+                            .append(Component.literal("发布者: ").withStyle(ChatFormatting.GRAY, ChatFormatting.BOLD))
+                            .append(Component.literal(author))
+                            .append("\n")
+                            .append(title)
+                            .append("。")
+                            .append(Component.literal(content))
+                            .append("\n")
+                            .append(Component.literal("发布时间：").withStyle(ChatFormatting.GRAY, ChatFormatting.BOLD))
+                            .append(Component.literal(notice.getAsJsonObject().get("created_time").getAsString()))
+                            .append("\n")
+                            .append(Component.literal("截止时间：").withStyle(ChatFormatting.GRAY, ChatFormatting.BOLD))
+                            .append(Component.literal(notice.getAsJsonObject().get("deadline").getAsString()));
+                }else{
+                    page = Component.empty()
+                            .append(Component.literal("Author: ").withStyle(ChatFormatting.GRAY, ChatFormatting.BOLD))
+                            .append(Component.literal(author))
+                            .append("\n")
+                            .append(title)
+                            .append("。")
+                            .append(Component.literal(content))
+                            .append("\n")
+                            .append(Component.literal("PublishTime(CST)：").withStyle(ChatFormatting.GRAY, ChatFormatting.BOLD))
+                            .append(Component.literal(notice.getAsJsonObject().get("created_time").getAsString()))
+                            .append("\n")
+                            .append(Component.literal("DeadLine：").withStyle(ChatFormatting.GRAY, ChatFormatting.BOLD))
+                            .append(Component.literal(notice.getAsJsonObject().get("deadline").getAsString()));
+                }
                pages.add(Filterable.passThrough(page));
             }
             for(int i=0;i<DRNG_NOTICES.getKey("notices").getAsJsonArray().size();i++){
@@ -101,13 +119,24 @@ public class NoticeCmd {
                 }
             }
         }
-        WrittenBookContent content = new WrittenBookContent(
-                Filterable.passThrough("公告栏"),
-                "希望之地",
-                0,
-                pages,
-                true
-        );
+        WrittenBookContent content;
+        if(local.equals("zh_cn")) {
+            content = new WrittenBookContent(
+                    Filterable.passThrough("公告栏"),
+                    "希望之地",
+                    0,
+                    pages,
+                    true
+            );
+        }else{
+            content = new WrittenBookContent(
+                    Filterable.passThrough("NoticeBar"),
+                    "Desideraregio",
+                    0,
+                    pages,
+                    true
+            );
+        }
         ItemStack book = new ItemStack(Items.WRITTEN_BOOK);
         book.set(DataComponents.WRITTEN_BOOK_CONTENT,content);
         return book;

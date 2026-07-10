@@ -31,6 +31,7 @@ public class TpaCmd {
     private static LiteralArgumentBuilder<CommandSourceStack> tpaCmdBuilder = Commands.literal("tpa")
             .then(Commands.argument("target", EntityArgument.player()).executes(context -> {
                 ServerPlayer sendr = (ServerPlayer) context.getSource().getPlayer();
+                String local = sendr.clientInformation().language();
                 ServerPlayer target = context.getArgument("target", EntitySelector.class).findSinglePlayer(context.getSource());
                 ServerScheduler serverScheduler = ((ServerSchedulerHolder)context.getSource().getServer()).drng$getServerSchedule();
                 serverScheduler.runTask(new ScheduleTask(sendr.getName().getString() + "TpaTimeOut",() -> {
@@ -42,27 +43,51 @@ public class TpaCmd {
                 PlayerStatusData senderData = sendr.getAttached(Attachments.PLAYER_STATUS_DATA);
                 sendr.setAttached(Attachments.PLAYER_STATUS_DATA,new PlayerStatusData(senderData.been_controlled(),senderData.is_controlling(),senderData.location_before_control(), Optional.of(target.getUUID())));
 
-                sendr.sendSystemMessage(Component.literal("请耐心等待对方接受传送哦~"));
-                target.sendSystemMessage(Component.literal("玩家 ")
-                        .append(sendr.getName().copy().withStyle(ChatFormatting.BOLD,ChatFormatting.YELLOW))
-                        .append(Component.literal(" 想要传送到你这里！"))
-                );
-                target.sendSystemMessage(Component.empty()
-                        .append(Component.literal("[同意]")
-                                .append(Component.object(new AtlasSprite(Identifier.tryBuild("minecraft","gui"),Identifier.tryBuild("minecraft","pending_invite/accept"))))
-                                .setStyle(Style.EMPTY
-                                                .withHoverEvent(new HoverEvent.ShowText(Component.literal("点击确认传送").withStyle(ChatFormatting.GREEN)))
-                                                .withClickEvent(new ClickEvent.RunCommand(String.format("/player-teleport-accept %s",sendr.getName().getString())))
-                                )
-                        )
-                        .append(" ")
-                        .append(Component.literal("[拒绝]")
-                                .append(Component.object(new AtlasSprite(Identifier.tryBuild("minecraft","gui"),Identifier.tryBuild("minecraft","pending_invite/reject"))))
-                                .setStyle(Style.EMPTY
-                                        .withHoverEvent(new HoverEvent.ShowText(Component.literal("点击拒绝传送").withStyle(ChatFormatting.GREEN)))
-                                        .withClickEvent(new ClickEvent.RunCommand(String.format("/reset-tpa-target %s",sendr.getName().getString())))
-                                ))
-                );
+                if(local.equals("zh_cn")) {
+                    sendr.sendSystemMessage(Component.literal("请耐心等待对方接受传送哦~"));
+                    target.sendSystemMessage(Component.literal("玩家 ")
+                            .append(sendr.getName().copy().withStyle(ChatFormatting.BOLD, ChatFormatting.YELLOW))
+                            .append(Component.literal(" 想要传送到你这里！"))
+                    );
+                    target.sendSystemMessage(Component.empty()
+                            .append(Component.literal("[同意]")
+                                    .append(Component.object(new AtlasSprite(Identifier.tryBuild("minecraft", "gui"), Identifier.tryBuild("minecraft", "pending_invite/accept"))))
+                                    .setStyle(Style.EMPTY
+                                            .withHoverEvent(new HoverEvent.ShowText(Component.literal("点击确认传送").withStyle(ChatFormatting.GREEN)))
+                                            .withClickEvent(new ClickEvent.RunCommand(String.format("/player-teleport-accept %s", sendr.getName().getString())))
+                                    )
+                            )
+                            .append(" ")
+                            .append(Component.literal("[拒绝]")
+                                    .append(Component.object(new AtlasSprite(Identifier.tryBuild("minecraft", "gui"), Identifier.tryBuild("minecraft", "pending_invite/reject"))))
+                                    .setStyle(Style.EMPTY
+                                            .withHoverEvent(new HoverEvent.ShowText(Component.literal("点击拒绝传送").withStyle(ChatFormatting.GREEN)))
+                                            .withClickEvent(new ClickEvent.RunCommand(String.format("/reset-tpa-target %s", sendr.getName().getString())))
+                                    ))
+                    );
+                }else{
+                    sendr.sendSystemMessage(Component.literal("Please wait"));
+                    target.sendSystemMessage(Component.literal("Player ")
+                            .append(sendr.getName().copy().withStyle(ChatFormatting.BOLD, ChatFormatting.YELLOW))
+                            .append(Component.literal(" Ask to teleport to your location"))
+                    );
+                    target.sendSystemMessage(Component.empty()
+                            .append(Component.literal("[Accept]")
+                                    .append(Component.object(new AtlasSprite(Identifier.tryBuild("minecraft", "gui"), Identifier.tryBuild("minecraft", "pending_invite/accept"))))
+                                    .setStyle(Style.EMPTY
+                                            .withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to accept").withStyle(ChatFormatting.GREEN)))
+                                            .withClickEvent(new ClickEvent.RunCommand(String.format("/player-teleport-accept %s", sendr.getName().getString())))
+                                    )
+                            )
+                            .append(" ")
+                            .append(Component.literal("[Reject]")
+                                    .append(Component.object(new AtlasSprite(Identifier.tryBuild("minecraft", "gui"), Identifier.tryBuild("minecraft", "pending_invite/reject"))))
+                                    .setStyle(Style.EMPTY
+                                            .withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to reject").withStyle(ChatFormatting.GREEN)))
+                                            .withClickEvent(new ClickEvent.RunCommand(String.format("/reset-tpa-target %s", sendr.getName().getString())))
+                                    ))
+                    );
+                }
                 return 0;
             }))
             .requires(commandSourceStack -> commandSourceStack.isPlayer());
@@ -93,11 +118,15 @@ public class TpaCmd {
             .then(Commands.argument("target",EntityArgument.player())
                     .executes(commandContext -> {
                         ServerPlayer sender = commandContext.getSource().getPlayer();
+                        String local = sender.clientInformation().language();
                         ServerPlayer target = commandContext.getArgument("target", EntitySelector.class).findSinglePlayer(commandContext.getSource());
                         PlayerStatusData targetData = target.getAttached(Attachments.PLAYER_STATUS_DATA);
                         if(targetData.tpa_target().isPresent() && targetData.tpa_target().get().equals(sender.getUUID())) {
                             target.setAttached(Attachments.PLAYER_STATUS_DATA, new PlayerStatusData(targetData.been_controlled(), targetData.is_controlling(), targetData.location_before_control(), Optional.empty()));
-                            target.sendSystemMessage(Component.literal("你被拒绝了！").withStyle(ChatFormatting.RED));
+                            if(local.equals("zh_cn"))
+                                target.sendSystemMessage(Component.literal("你被拒绝了！").withStyle(ChatFormatting.RED));
+                            else
+                                target.sendSystemMessage(Component.literal("Your request have been rejected").withStyle(ChatFormatting.RED));
                         }
                             return  0;
                     }))

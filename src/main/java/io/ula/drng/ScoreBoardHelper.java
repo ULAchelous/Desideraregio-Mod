@@ -36,19 +36,28 @@ public class ScoreBoardHelper {
 //    }
     public static void initObjective(ServerPlayer player){
         Objective sidebar;
+        String local = player.clientInformation().language();
         if(objectives.containsKey(player.getUUID())){
             sidebar = getObjective(player);
         }else {
-
             Scoreboard scoreboard = server.getScoreboard();
-            Component server_name = Component.literal("希").withColor(0x00CCFF)
-                    .append(Component.literal("望").withColor(0x0099CC))
-                    .append(Component.literal("之").withColor(0x006699))
-                    .append(Component.literal("地").withColor(0x003366))
-                    .append(Component.literal(" - NextGen").withColor(0x003366))
-                    .withStyle(ChatFormatting.BOLD, ChatFormatting.ITALIC);
+            Component server_name;
+            if(local.equals("zh_cn")) {
+                server_name = Component.literal("希").withColor(0x00CCFF)
+                        .append(Component.literal("望").withColor(0x0099CC))
+                        .append(Component.literal("之").withColor(0x006699))
+                        .append(Component.literal("地").withColor(0x003366))
+                        .append(Component.literal(" - NextGen").withColor(0x003366))
+                        .withStyle(ChatFormatting.BOLD, ChatFormatting.ITALIC);
 
-
+            }else{
+                server_name = Component.literal("Des").withColor(0x00CCFF)
+                        .append(Component.literal("ider").withColor(0x0099CC))
+                        .append(Component.literal("are").withColor(0x006699))
+                        .append(Component.literal("gio").withColor(0x003366))
+                        .append(Component.literal(" - NextGen").withColor(0x003366))
+                        .withStyle(ChatFormatting.BOLD, ChatFormatting.ITALIC);
+            }
             sidebar = new Objective(
                     scoreboard,
                     player.getName().getString(),
@@ -65,11 +74,17 @@ public class ScoreBoardHelper {
         updateScores(player,UpdateType.ONLINE_TIME);
         updateScores(player,UpdateType.DEATH_COUNT);
         updateScores(player,UpdateType.DIG_COUNT);
-        sendScore2Player(player,"helpCmd",sidebar,Component.literal("使用 ")
-                        .append(Component.literal("/help").withStyle(ChatFormatting.BOLD,ChatFormatting.YELLOW))
-                ,BlankFormat.INSTANCE,2);
-        sendScore2Player(player,"helpCmd1",sidebar,Component.literal("来获取帮助"),BlankFormat.INSTANCE,2);
-
+        if(local.equals("zh_cn")) {
+            sendScore2Player(player, "helpCmd", sidebar, Component.literal("使用 ")
+                            .append(Component.literal("/help").withStyle(ChatFormatting.BOLD, ChatFormatting.YELLOW))
+                    , BlankFormat.INSTANCE, 2);
+            sendScore2Player(player, "helpCmd1", sidebar, Component.literal("来获取帮助"), BlankFormat.INSTANCE, 2);
+        }else{
+            sendScore2Player(player, "helpCmd", sidebar, Component.literal("use")
+                            .append(Component.literal("/help").withStyle(ChatFormatting.BOLD, ChatFormatting.YELLOW))
+                    , BlankFormat.INSTANCE, 2);
+            sendScore2Player(player, "helpCmd1", sidebar, Component.literal("to get helps"), BlankFormat.INSTANCE, 2);
+        }
         //scoreboard.setDisplayObjective(DisplaySlot.SIDEBAR,sidebar);
     }
 
@@ -103,19 +118,38 @@ public class ScoreBoardHelper {
         PlayerCntData playerCntData = player.getAttached(Attachments.PLAYER_CNT_DATA);
         Objective playerObjective = objectives.get(player.getUUID());
         //更新数值
-        switch(type) {
-            case DEATH_COUNT:
-                Component c1 = Component.literal("死亡计数: ").append(Component.literal(Long.toString(playerCntData.deathCnt())).withStyle(ChatFormatting.AQUA,ChatFormatting.BOLD));
-                sendScore2Player(player,"deathCnt",objective,c1,BlankFormat.INSTANCE,3);
-                break;
-            case DIG_COUNT:
-                Component c2 = Component.literal("挖掘计数: ").append(Component.literal(Long.toString(playerCntData.digCnt())).withStyle(ChatFormatting.AQUA,ChatFormatting.BOLD));
-                sendScore2Player(player,"digCnt",objective,c2,BlankFormat.INSTANCE,3);
-                break;
-            case ONLINE_TIME:
-                Component c3 = Component.literal("在线时长: ").append(Component.literal(getOnlineTime(((int)playerCntData.onlineTime()))).withStyle(ChatFormatting.AQUA,ChatFormatting.BOLD));
-                sendScore2Player(player,"onlineTime",objective,c3,BlankFormat.INSTANCE,3);
-                break;
+        String local = player.clientInformation().language();
+
+        if(local.equals("zh_cn")) {
+            switch (type) {
+                case DEATH_COUNT:
+                    Component c1 = Component.literal("死亡计数: ").append(Component.literal(Long.toString(playerCntData.deathCnt())).withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD));
+                    sendScore2Player(player, "deathCnt", objective, c1, BlankFormat.INSTANCE, 3);
+                    break;
+                case DIG_COUNT:
+                    Component c2 = Component.literal("挖掘计数: ").append(Component.literal(Long.toString(playerCntData.digCnt())).withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD));
+                    sendScore2Player(player, "digCnt", objective, c2, BlankFormat.INSTANCE, 3);
+                    break;
+                case ONLINE_TIME:
+                    Component c3 = Component.literal("在线时长: ").append(Component.literal(getOnlineTime(((int) playerCntData.onlineTime()))).withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD));
+                    sendScore2Player(player, "onlineTime", objective, c3, BlankFormat.INSTANCE, 3);
+                    break;
+            }
+        }else{
+            switch (type) {
+                case DEATH_COUNT:
+                    Component c1 = Component.literal("Deaths: ").append(Component.literal(Long.toString(playerCntData.deathCnt())).withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD));
+                    sendScore2Player(player, "deathCnt", objective, c1, BlankFormat.INSTANCE, 3);
+                    break;
+                case DIG_COUNT:
+                    Component c2 = Component.literal("Mined: ").append(Component.literal(Long.toString(playerCntData.digCnt())).withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD));
+                    sendScore2Player(player, "digCnt", objective, c2, BlankFormat.INSTANCE, 3);
+                    break;
+                case ONLINE_TIME:
+                    Component c3 = Component.literal("Online: ").append(Component.literal(getOnlineTime(((int) playerCntData.onlineTime()))).withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD));
+                    sendScore2Player(player, "onlineTime", objective, c3, BlankFormat.INSTANCE, 3);
+                    break;
+            }
         }
     }
     public static Objective getObjective(ServerPlayer player){

@@ -29,20 +29,36 @@ public class ControlCmd {
                     .then(Commands.argument("player", EntityArgument.player())
                             .executes(commandContext -> {
                                 ServerPlayer sender = commandContext.getSource().getPlayer();
+                                String local = sender.clientInformation().language();
                                 ServerPlayer target = commandContext.getArgument("player", EntitySelector.class).findSinglePlayer(commandContext.getSource());
 
                                 PlayerStatusData data = target.getAttached(Attachments.PLAYER_STATUS_DATA);
-                                if(data.is_controlling().isPresent()){
-                                    sender.sendSystemMessage(Component.literal("无法控制(未退出正在进行的控制)").withStyle(ChatFormatting.RED));
-                                    return 0;
-                                }
-                                if (target.equals(sender)) {
-                                    sender.sendSystemMessage(Component.literal("无法控制(对象为自身)").withStyle(ChatFormatting.RED));
-                                    return 0;
-                                }
-                                if (target.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
-                                    sender.sendSystemMessage(Component.literal("无法控制(对象为Operator)").withStyle(ChatFormatting.RED));
-                                    return 0;
+                                if(local.equals("zh_cn")) {
+                                    if (data.is_controlling().isPresent()) {
+                                        sender.sendSystemMessage(Component.literal("无法控制(未退出正在进行的控制)").withStyle(ChatFormatting.RED));
+                                        return 0;
+                                    }
+                                    if (target.equals(sender)) {
+                                        sender.sendSystemMessage(Component.literal("无法控制(对象为自身)").withStyle(ChatFormatting.RED));
+                                        return 0;
+                                    }
+                                    if (target.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
+                                        sender.sendSystemMessage(Component.literal("无法控制(对象为Operator)").withStyle(ChatFormatting.RED));
+                                        return 0;
+                                    }
+                                }else{
+                                    if (data.is_controlling().isPresent()) {
+                                        sender.sendSystemMessage(Component.literal("Cannot control: You must exit your current control session first.").withStyle(ChatFormatting.RED));
+                                        return 0;
+                                    }
+                                    if (target.equals(sender)) {
+                                        sender.sendSystemMessage(Component.literal("Cannot control: You cannot control yourself.").withStyle(ChatFormatting.RED));
+                                        return 0;
+                                    }
+                                    if (target.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
+                                        sender.sendSystemMessage(Component.literal("Cannot control: Target is an Operator.").withStyle(ChatFormatting.RED));
+                                        return 0;
+                                    }
                                 }
 
                                 sender.setInvisible(true);
@@ -65,6 +81,7 @@ public class ControlCmd {
                     ).requires(commandSourceStack -> (commandSourceStack.isPlayer() && commandSourceStack.getPlayer().permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))))
             .then(Commands.literal("stop").executes(commandContext -> {
                 ServerPlayer player = commandContext.getSource().getPlayer();
+                String local = player.clientInformation().language();
                 PlayerStatusData data = player.getAttached(Attachments.PLAYER_STATUS_DATA);
 
                 if(data.is_controlling().isPresent()){
@@ -75,7 +92,10 @@ public class ControlCmd {
                     player.setInvisible(false);
                     player.removeEffect(MobEffects.INVISIBILITY);
                 }else{
-                    player.sendSystemMessage(Component.literal("没有正在进行的控制").withStyle(ChatFormatting.RED));
+                    if(local.equals("zh_cn"))
+                        player.sendSystemMessage(Component.literal("没有正在进行的控制").withStyle(ChatFormatting.RED));
+                    else
+                        player.sendSystemMessage(Component.literal("No recent control").withStyle(ChatFormatting.RED));
                 }
                 return 0;
             }))
@@ -93,22 +113,38 @@ public class ControlCmd {
                                     })
                                     .executes(commandContext -> {
                                         ServerPlayer sender = commandContext.getSource().getPlayer();
+                                        String local = sender.clientInformation().language();
                                         String targetName = commandContext.getArgument("bot",String.class);
                                         ServerPlayer target = commandContext.getSource().getServer().getPlayerList().getPlayer(targetName);
 
                                         if(target != null && PlayerUtils.isFakePlayer(target)) {
                                             PlayerStatusData data = target.getAttached(Attachments.PLAYER_STATUS_DATA);
-                                            if (data.is_controlling().isPresent()) {
-                                                sender.sendSystemMessage(Component.literal("无法控制(未退出正在进行的控制)").withStyle(ChatFormatting.RED));
-                                                return 0;
-                                            }
-                                            if (target.equals(sender)) {
-                                                sender.sendSystemMessage(Component.literal("无法控制(对象为自身)").withStyle(ChatFormatting.RED));
-                                                return 0;
-                                            }
-                                            if (target.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
-                                                sender.sendSystemMessage(Component.literal("无法控制(对象为Operator)").withStyle(ChatFormatting.RED));
-                                                return 0;
+                                            if(local.equals("zh_cn")) {
+                                                if (data.is_controlling().isPresent()) {
+                                                    sender.sendSystemMessage(Component.literal("无法控制(未退出正在进行的控制)").withStyle(ChatFormatting.RED));
+                                                    return 0;
+                                                }
+                                                if (target.equals(sender)) {
+                                                    sender.sendSystemMessage(Component.literal("无法控制(对象为自身)").withStyle(ChatFormatting.RED));
+                                                    return 0;
+                                                }
+                                                if (target.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
+                                                    sender.sendSystemMessage(Component.literal("无法控制(对象为Operator)").withStyle(ChatFormatting.RED));
+                                                    return 0;
+                                                }
+                                            }else{
+                                                if (data.is_controlling().isPresent()) {
+                                                    sender.sendSystemMessage(Component.literal("Cannot control: You must exit your current control session first.").withStyle(ChatFormatting.RED));
+                                                    return 0;
+                                                }
+                                                if (target.equals(sender)) {
+                                                    sender.sendSystemMessage(Component.literal("Cannot control: You cannot control yourself.").withStyle(ChatFormatting.RED));
+                                                    return 0;
+                                                }
+                                                if (target.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
+                                                    sender.sendSystemMessage(Component.literal("Cannot control: Target is an Operator.").withStyle(ChatFormatting.RED));
+                                                    return 0;
+                                                }
                                             }
 
                                             sender.setInvisible(true);
@@ -127,7 +163,10 @@ public class ControlCmd {
                                             sender.setAttached(Attachments.PLAYER_STATUS_DATA, new PlayerStatusData(Optional.empty(), Optional.of(target.getUUID()), Optional.of(sender.position()), sender.getAttached(Attachments.PLAYER_STATUS_DATA).tpa_target()));//使用元数据标记控制玩家，存储被控制者
                                             // 存储控制者控制前的坐标
                                         }else{
-                                            sender.sendSystemMessage(Component.literal("无法控制(玩家不存在或无权控制)").withStyle(ChatFormatting.RED));
+                                            if(local.equals("zh_cn"))
+                                                sender.sendSystemMessage(Component.literal("无法控制(玩家不存在或无权控制)").withStyle(ChatFormatting.RED));
+                                            else
+                                                sender.sendSystemMessage(Component.literal("Unable to control(Lack permission or player dose not exist)").withStyle(ChatFormatting.RED));
                                         }
                                         return 0;
                                     })

@@ -86,8 +86,12 @@ public class TBUtils {
         server.sendSystemMessage(Component.literal(tips.get(new Random().nextInt(tips.size())).getAsString()));
     }
 
-    public static Component getFlowingNoticeBoard(){
-        Component nb = Component.literal("----------流动公告----------").append("\n");
+    public static Component getFlowingNoticeBoard(String local){
+        Component nb;
+        if(local.equals("zh_cn"))
+            nb = Component.literal("----------流动公告----------").append("\n");
+        else
+            nb = Component.literal("----------Flowing Notice----------").append("\n");
         ConfigFile NOTICE = Main.getConfigManager().getConfig("drng:notices");
         if(NOTICE.has("notices")){
             for(JsonElement element : NOTICE.getKey("notices").getAsJsonArray()){
@@ -97,7 +101,10 @@ public class TBUtils {
                         .append(Component.literal(jsonObject.get("title").getAsString()))
                         .append("\n");
             }
-            nb = nb.copy().append(Component.literal("点击查看详情").setStyle(Style.EMPTY.applyFormat(ChatFormatting.AQUA).withClickEvent(new ClickEvent.RunCommand("/notice list"))));
+            if(local.equals("zh_cn"))
+                nb = nb.copy().append(Component.literal("点击查看详情").setStyle(Style.EMPTY.applyFormat(ChatFormatting.AQUA).withClickEvent(new ClickEvent.RunCommand("/notice list"))));
+            else
+                nb = nb.copy().append(Component.literal("Click to view.").setStyle(Style.EMPTY.applyFormat(ChatFormatting.AQUA).withClickEvent(new ClickEvent.RunCommand("/notice list"))));
             return nb;
         }else{
             return null;

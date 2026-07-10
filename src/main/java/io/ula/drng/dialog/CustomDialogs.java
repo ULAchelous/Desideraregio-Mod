@@ -108,7 +108,7 @@ public class CustomDialogs {
             )
             .cancellable(true)
             .build();
-    public static final Dialog NEW_NOTICE_DIALOG_EN = new DialogBuilder(Component.literal("发布公告"))
+    public static final Dialog NEW_NOTICE_DIALOG_EN = new DialogBuilder(Component.literal("Publish Notice"))
             .inputs(
                     List.of(
                             new Input("author",new TextInput(500,Component.literal("Author"),true,"",10,Optional.empty())),

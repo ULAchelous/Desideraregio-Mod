@@ -96,7 +96,7 @@ public class Main implements ModInitializer {
                 ClientboundShowDialogPacket packet = new ClientboundShowDialogPacket(Holder.direct(CustomDialogs.EULA_DIALOG));
                 serverPlayer.connection.send(packet);
             }
-            serverPlayer.sendSystemMessage(TBUtils.getFlowingNoticeBoard());
+            serverPlayer.sendSystemMessage(TBUtils.getFlowingNoticeBoard(serverPlayer.clientInformation().language()));
         });
         PlayerBlockBreakEvents.AFTER.register((level, player, blockPos, blockState, blockEntity) -> {
             if(!PlayerUtils.isFakePlayer((ServerPlayer) player)) {

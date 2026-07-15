@@ -14,6 +14,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.component.ResolvableProfile;
+import org.apache.logging.log4j.core.jmx.Server;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -44,20 +45,16 @@ public abstract class PlayerMixin {
 
     @Redirect(method = "rideTick",at = @At(value = "INVOKE", target = "net/minecraft/world/entity/player/Player.stopRiding ()V"))
     private void stopRidingInject(Player player){
-        ServerPlayer serverPlayer;
-        if(player instanceof ServerPlayer) {
-            serverPlayer = (ServerPlayer) player;
-        }else {
+        if(player instanceof ServerPlayer serverPlayer) {
+            Entity vehicle = serverPlayer.getVehicle();
             player.stopRiding();
-            return;
-        }
-        Entity vehicle = serverPlayer.getVehicle();
-        if(vehicle.getType().equals(EntityType.PLAYER)){
-            player.stopRiding();
-            ClientboundSetPassengersPacket packet = new ClientboundSetPassengersPacket(vehicle);
-            for(ServerPlayer p :  serverPlayer.level().getServer().getPlayerList().getPlayers()){
-                p.connection.send(packet);
+            if (vehicle.getType().equals(EntityType.PLAYER)) {
+                ClientboundSetPassengersPacket packet = new ClientboundSetPassengersPacket(vehicle);
+                for (ServerPlayer p : serverPlayer.level().getServer().getPlayerList().getPlayers()) {
+                    p.connection.send(packet);
+                }
             }
         }
     }
 }
+

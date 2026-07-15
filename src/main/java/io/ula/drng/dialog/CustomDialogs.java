@@ -41,7 +41,6 @@ public class CustomDialogs {
             .actions(List.of(
 
                     new Button(new CommonButtonData(Component.literal("同意"),180),new CustomAll(Identifier.tryBuild("drng","eula/accept"),Optional.empty()),(serverPlayer,packet) -> {
-                        LogManager.getLogger("test").info("example");
                         ConfigFile PLAYER_EULA = Main.getConfigManager().getConfig("drng:eula");
                         PLAYER_EULA.addKey(serverPlayer.getStringUUID(),true);
                     }),

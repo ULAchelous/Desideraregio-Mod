@@ -14,6 +14,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.objects.PlayerSprite;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.component.ResolvableProfile;
@@ -31,19 +32,19 @@ public class TBUtils {
         ServerLevel nether = server.getLevel(Level.NETHER);
         ServerLevel the_end = server.getLevel(Level.END);
         for (Entity entity : overworld.getAllEntities()) {
-                if (entity.getType() == EntityType.ITEM) {
+                if (entity != null && entity.getType() == EntityType.ITEM) {
                     entity.remove(Entity.RemovalReason.DISCARDED);
                     owCnt++;
                 }
         }
         for (Entity entity : nether.getAllEntities()) {
-            if (entity.getType() == EntityType.ITEM) {
+            if (entity != null && entity.getType() == EntityType.ITEM) {
                 entity.remove(Entity.RemovalReason.DISCARDED);
                 netherCnt++;
             }
         }
         for (Entity entity : the_end.getAllEntities()) {
-            if (entity.getType() == EntityType.ITEM) {
+            if (entity != null && entity.getType() == EntityType.ITEM) {
                 entity.remove(Entity.RemovalReason.DISCARDED);
                 teCnt++;
             }
@@ -51,7 +52,7 @@ public class TBUtils {
         if((owCnt | netherCnt | teCnt) != 0) {
             ResolvableProfile profile = ResolvableProfile.createResolved(new GameProfile(UUID.fromString("793be6b0-de85-412a-8483-636d6f8c74d0"),"AZ9C"));
             new GameProfile(UUID.fromString("793be6b0-de85-412a-8483-636d6f8c74d0"),"AZ9C");
-            server.sendSystemMessage(Component.empty()
+            Component component = Component.empty()
                     .append(Component.object(new PlayerSprite(profile,true)))
                     .append(Component.literal("["))
                     .append(Component.literal("AL-1S").setStyle(Style.EMPTY.withColor(0x76d7ea).applyFormat(ChatFormatting.BOLD)))
@@ -61,29 +62,34 @@ public class TBUtils {
                             .append(" ")
                             .append(Component.literal(Integer.toString(owCnt + netherCnt + teCnt)).withStyle(ChatFormatting.AQUA,ChatFormatting.BOLD))
                             .append(" ")
-                            .append(Component.literal("个掉落物！")))
-            );
-            server.sendSystemMessage(Component.literal("主世界：")
+                            .append(Component.literal("个掉落物！")));
+            Component component1 = Component.literal("主世界：")
                     .append(Component.literal(Integer.toString(owCnt)).withStyle(ChatFormatting.YELLOW))
                     .append(" ")
                     .append(Component.literal("下界："))
                     .append(Component.literal(Integer.toString(netherCnt)).withStyle(ChatFormatting.YELLOW))
                     .append(" ")
                     .append(Component.literal("末地："))
-                    .append(Component.literal(Integer.toString(teCnt)).withStyle(ChatFormatting.YELLOW))
-            );
+                    .append(Component.literal(Integer.toString(teCnt)).withStyle(ChatFormatting.YELLOW));
+
+            for(ServerPlayer player : server.getPlayerList().getPlayers()){
+                player.sendSystemMessage(component);
+                player.sendSystemMessage(component1);
+            }
         }
     }
 
     public static void tipsBehaviour(){
         ConfigFile DRNG_TIPS = Main.getConfigManager().getConfig("drng:tips");
         JsonArray tips = DRNG_TIPS.getKey("tips").getAsJsonArray();
-        server.sendSystemMessage(Component.literal("[")
-                        .withStyle(ChatFormatting.BOLD)
+        Component tip = Component.literal("[")
+                .withStyle(ChatFormatting.BOLD)
                 .append(Component.literal("提示").withStyle(ChatFormatting.YELLOW))
-                .append(Component.literal("]:"))
-        );
-        server.sendSystemMessage(Component.literal(tips.get(new Random().nextInt(tips.size())).getAsString()));
+                .append(Component.literal("]:"));
+        for(ServerPlayer player : server.getPlayerList().getPlayers()) {
+            player.sendSystemMessage(tip);
+            player.sendSystemMessage(Component.literal(tips.get(new Random().nextInt(tips.size())).getAsString()));
+        }
     }
 
     public static Component getFlowingNoticeBoard(String local){

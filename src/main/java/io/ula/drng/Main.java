@@ -77,8 +77,8 @@ public class Main implements ModInitializer {
                     }
                 }
             },0,1200));
-            scheduler.runTask(new ScheduleTask("DisplayTips",TBUtils::tipsBehaviour,0,30*60*20));
-            scheduler.runTask(new ScheduleTask("Alice",TBUtils::aliceBehaviour,0,60*60*20));
+            scheduler.runTask(new ScheduleTask("DisplayTips",TBUtils::tipsBehaviour,0,25*60*20));
+            scheduler.runTask(new ScheduleTask("Alice",TBUtils::aliceBehaviour,30*60*20,30*60*20));
         });
         ServerLifecycleEvents.SERVER_STOPPING.register(minecraftServer -> {
             this.configManager.onDisabled();

@@ -50,8 +50,7 @@ public class TBUtils {
             }
         }
         if((owCnt | netherCnt | teCnt) != 0) {
-            ResolvableProfile profile = ResolvableProfile.createResolved(new GameProfile(UUID.fromString("793be6b0-de85-412a-8483-636d6f8c74d0"),"AZ9C"));
-            new GameProfile(UUID.fromString("793be6b0-de85-412a-8483-636d6f8c74d0"),"AZ9C");
+            ResolvableProfile profile = Util.buildProfile(UUID.fromString("793be6b0-de85-412a-8483-636d6f8c74d0"));
             Component component = Component.empty()
                     .append(Component.object(new PlayerSprite(profile,true)))
                     .append(Component.literal("["))

@@ -8,6 +8,7 @@
     "server.ServerWatchDogMixin",
     "server.network.ServerGamePacketListenerMixin",
     "server.ServerExplosionMixin",
+    "server.MinecraftServerMixin",
     "server.network.ServerGamePacketListenerHolderMixin",
     "entity.EntityMixin",
     "server.players.PlayerListMixin"

@@ -52,7 +52,7 @@ public class ServerStatusPacketListenerMixin {
                 }
             });
         }
-        if(!cachedHitokoto.isBlank() && !cachedHitokoto.isEmpty())
+        if(!cachedHitokoto.isBlank())
             holder.setMotd(cachedHitokoto, CustomMotdHolder.Type.DIRECT_REPLACE);
     }
 }

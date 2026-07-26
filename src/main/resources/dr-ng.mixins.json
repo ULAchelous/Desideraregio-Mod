@@ -10,6 +10,7 @@
     "server.ServerExplosionMixin",
     "server.MinecraftServerMixin",
     "server.network.ServerGamePacketListenerHolderMixin",
+    "server.network.ServerStatusPacketListenerMixin",
     "entity.EntityMixin",
     "server.players.PlayerListMixin"
   ],

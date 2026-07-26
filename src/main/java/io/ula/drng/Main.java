@@ -1,5 +1,6 @@
 package io.ula.drng;
 
+import com.google.gson.JsonObject;
 import com.mojang.brigadier.tree.RootCommandNode;
 import io.ula.api.config.*;
 import io.ula.drng.attachments.Attachments;
@@ -23,6 +24,8 @@ import net.minecraft.network.protocol.common.ClientboundShowDialogPacket;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Path;
 
 
@@ -61,6 +64,7 @@ public class Main implements ModInitializer {
             rootNode.addChild(HomeCmd.PRHCmd);
             rootNode.addChild(HelpCmd.helpCmd);
             rootNode.addChild(NoticeCmd.noticeCmd);
+            rootNode.addChild(AliceCmd.aliceCmd);
         });
     }
 
@@ -79,6 +83,7 @@ public class Main implements ModInitializer {
             },0,1200));
             scheduler.runTask(new ScheduleTask("DisplayTips",TBUtils::tipsBehaviour,0,25*60*20));
             scheduler.runTask(new ScheduleTask("Alice",TBUtils::aliceBehaviour,30*60*20,30*60*20));
+            //注册任务
         });
         ServerLifecycleEvents.SERVER_STOPPING.register(minecraftServer -> {
             this.configManager.onDisabled();

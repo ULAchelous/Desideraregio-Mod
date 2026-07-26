@@ -1,8 +1,6 @@
 package io.ula.drng.utils;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import com.mojang.authlib.GameProfile;
 import io.ula.drng.Main;
 import io.ula.api.config.*;
@@ -17,9 +15,17 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.entity.EntityTypeTest;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -31,20 +37,25 @@ public class TBUtils {
         ServerLevel overworld = server.overworld();
         ServerLevel nether = server.getLevel(Level.NETHER);
         ServerLevel the_end = server.getLevel(Level.END);
-        for (Entity entity : overworld.getAllEntities()) {
-                if (entity != null && entity.getType() == EntityType.ITEM) {
+
+        List<? extends ItemEntity> owEntities = overworld.getEntities(EntityTypeTest.forClass(ItemEntity.class),itemEntity -> itemEntity.isAlive());
+        List<? extends ItemEntity> tnEntities = nether.getEntities(EntityTypeTest.forClass(ItemEntity.class),itemEntity -> itemEntity.isAlive());
+        List<? extends ItemEntity> teEntities = the_end.getEntities(EntityTypeTest.forClass(ItemEntity.class),itemEntity -> itemEntity.isAlive());
+
+        for (Entity entity : owEntities) {
+                if (entity != null) {
                     entity.remove(Entity.RemovalReason.DISCARDED);
                     owCnt++;
                 }
         }
-        for (Entity entity : nether.getAllEntities()) {
-            if (entity != null && entity.getType() == EntityType.ITEM) {
+        for (Entity entity : tnEntities) {
+            if (entity != null) {
                 entity.remove(Entity.RemovalReason.DISCARDED);
                 netherCnt++;
             }
         }
-        for (Entity entity : the_end.getAllEntities()) {
-            if (entity != null && entity.getType() == EntityType.ITEM) {
+        for (Entity entity : teEntities) {
+            if (entity != null) {
                 entity.remove(Entity.RemovalReason.DISCARDED);
                 teCnt++;
             }
@@ -85,9 +96,10 @@ public class TBUtils {
                 .withStyle(ChatFormatting.BOLD)
                 .append(Component.literal("提示").withStyle(ChatFormatting.YELLOW))
                 .append(Component.literal("]:"));
+        Component tipContent = Component.literal(tips.get(new Random().nextInt(tips.size())).getAsString());
         for(ServerPlayer player : server.getPlayerList().getPlayers()) {
             player.sendSystemMessage(tip);
-            player.sendSystemMessage(Component.literal(tips.get(new Random().nextInt(tips.size())).getAsString()));
+            player.sendSystemMessage(tipContent);
         }
     }
 
@@ -115,4 +127,5 @@ public class TBUtils {
             return null;
         }
     }
+
 }

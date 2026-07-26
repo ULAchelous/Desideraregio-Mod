@@ -36,6 +36,7 @@ public class ServerStatusPacketListenerMixin {
             CompletableFuture.runAsync(() -> {
                 try {
                     JsonObject response = Util.requestAPIAsJson(new URL("https://v1.hitokoto.cn"));
+
                     String hitokoto = response.get("hitokoto").getAsString();
                     JsonElement e1 = response.get("from");
                     String from = !e1.isJsonNull() ? e1.getAsString() : "未知";
@@ -44,7 +45,7 @@ public class ServerStatusPacketListenerMixin {
                     String motd = String.format("§f§o“%s”\n   —— §e%s§b「%s」",hitokoto,from_who,from);
 
                     cachedHitokoto = motd;
-                } catch (MalformedURLException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }finally {
                     isFetching = false;

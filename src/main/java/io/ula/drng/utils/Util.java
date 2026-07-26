@@ -29,6 +29,7 @@ public class Util {
             connection.setRequestMethod("GET");
             connection.setConnectTimeout(5000);
             connection.setReadTimeout(5000);
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0");
 
             if(connection.getResponseCode() == 200){
                 if (connection.getResponseCode() == 200) {

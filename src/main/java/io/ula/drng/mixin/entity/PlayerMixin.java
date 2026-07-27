@@ -1,5 +1,6 @@
 package io.ula.drng.mixin.entity;
 
+import carpet.patches.EntityPlayerMPFake;
 import com.mojang.authlib.GameProfile;
 import io.ula.drng.utils.PlayerUtils;
 import net.fabricmc.loader.api.FabricLoader;
@@ -10,11 +11,13 @@ import net.minecraft.network.chat.contents.objects.PlayerSprite;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.component.ResolvableProfile;
 import org.apache.logging.log4j.core.jmx.Server;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -28,6 +31,8 @@ public abstract class PlayerMixin {
 
     @Shadow
     public abstract Component getName();
+    @Shadow @Final
+    private GameProfile gameProfile;
     @Shadow
     public abstract GameProfile getGameProfile();
 
@@ -56,5 +61,7 @@ public abstract class PlayerMixin {
             }
         }
     }
+
+
 }
 

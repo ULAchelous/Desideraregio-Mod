@@ -15,15 +15,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 
 @Mixin(MinecraftServer.class)
-public class MinecraftServerMixin{
+public class MinecraftServerMixin {
 
-    @Inject(method = "buildPlayerStatus",at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "net/minecraft/util/Util.shuffle (Ljava/util/List;Lnet/minecraft/util/RandomSource;)V"),order = 2,cancellable = true)
-    private void playerStatusInject(CallbackInfoReturnable cir,@Local List<ServerPlayer> list,@Local ObjectArrayList<NameAndId> objectArrayList){
+    @Inject(method = "buildPlayerStatus", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "net/minecraft/util/Util.shuffle (Ljava/util/List;Lnet/minecraft/util/RandomSource;)V"), order = 2, cancellable = true)
+    private void playerStatusInject(CallbackInfoReturnable cir, @Local List<ServerPlayer> list, @Local ObjectArrayList<NameAndId> objectArrayList) {
         MinecraftServer target = (MinecraftServer) (Object) this;
         int i = target.getMaxPlayers();
         int fixedPlayerCount = 0;
-        for(ServerPlayer serverPlayer : list)
-            if(!PlayerUtils.isFakePlayer(serverPlayer)) fixedPlayerCount ++;
-        cir.setReturnValue(new ServerStatus.Players(i,fixedPlayerCount,objectArrayList));
+        for (ServerPlayer serverPlayer : list)
+            if (!PlayerUtils.isFakePlayer(serverPlayer)) fixedPlayerCount++;
+        cir.setReturnValue(new ServerStatus.Players(i, fixedPlayerCount, objectArrayList));
     }
 }

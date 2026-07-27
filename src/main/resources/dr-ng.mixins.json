@@ -3,6 +3,7 @@
   "minVersion": "0.8",
   "package": "io.ula.drng.mixin",
   "compatibilityLevel": "JAVA_21",
+  "plugin": "io.ula.drng.mixin.ModMixinPlugin",
   "mixins": [
     "entity.PlayerMixin",
     "server.ServerWatchDogMixin",
@@ -12,7 +13,8 @@
     "server.network.ServerGamePacketListenerHolderMixin",
     "server.network.ServerStatusPacketListenerMixin",
     "entity.EntityMixin",
-    "server.players.PlayerListMixin"
+    "server.players.PlayerListMixin",
+    "carpet.patches.EntityPlayerMPFakeMixin"
   ],
   "injectors": {
     "defaultRequire": 1

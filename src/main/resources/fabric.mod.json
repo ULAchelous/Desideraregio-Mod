@@ -22,6 +22,9 @@
     "minecraft": "${minecraft_version}",
     "ula_api": ">=0.26.530"
   },
+  "suggests": {
+    "carpet": "*"
+  },
   "jars": [
     {
       "file": "libs/java/ConfigEngine-0.26.530-all.jar"

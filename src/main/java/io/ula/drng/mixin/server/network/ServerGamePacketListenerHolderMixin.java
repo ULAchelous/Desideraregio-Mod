@@ -10,6 +10,7 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,6 +38,7 @@ public class ServerGamePacketListenerHolderMixin{
                 interactionHand == InteractionHand.MAIN_HAND
                 && val$target instanceof Player
                 && !val$target.getPassengers().contains(field_28963.player)
+                && excutor.getItemInHand(interactionHand).is(Items.AIR)
         ){
             Boolean b = excutor.startRiding(val$target,true,true);
             if(b){

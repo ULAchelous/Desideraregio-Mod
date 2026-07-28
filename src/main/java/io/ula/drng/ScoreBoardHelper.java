@@ -55,7 +55,8 @@ public class ScoreBoardHelper {
                         .append(Component.literal(" - NextGen").withColor(0x003366))
                         .withStyle(ChatFormatting.BOLD, ChatFormatting.ITALIC);
             }
-            sidebar = scoreboard.addObjective(
+            sidebar = new Objective(
+                    scoreboard,
                     player.getName().getString(),
                     ObjectiveCriteria.DUMMY,
                     server_name,
@@ -88,20 +89,23 @@ public class ScoreBoardHelper {
     public static void initOverrideObjectives(){
         Scoreboard scoreboard = server.getScoreboard();
 
-        Objective health_display = scoreboard.addObjective (
-                "health",
-                ObjectiveCriteria.HEALTH,
-                Component.literal("health"),
-                ObjectiveCriteria.RenderType.HEARTS,
-                true,
-                null
-        );
+        if(!scoreboard.getObjectiveNames().contains("health")) {
+            Objective health_display = scoreboard.addObjective(
+                    "health",
+                    ObjectiveCriteria.HEALTH,
+                    Component.literal("health"),
+                    ObjectiveCriteria.RenderType.HEARTS,
+                    true,
+                    null
+            );
+            scoreboard.setDisplayObjective(DisplaySlot.LIST,health_display);
+        }
 
         //health_display.setDisplayAutoUpdate(true);
-        scoreboard.setDisplayObjective(DisplaySlot.LIST,health_display);
-        for(ServerPlayer player : server.getPlayerList().getPlayers()){
-            setPlayerObjective(player,health_display,DisplaySlot.LIST);
-        }
+
+//        for(ServerPlayer player : server.getPlayerList().getPlayers()){
+//            setPlayerObjective(player,health_display,DisplaySlot.LIST);
+//        }
     }
 
     public static void removeObjective(ServerPlayer player) {

@@ -22,6 +22,10 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.AirItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -43,7 +47,7 @@ public class ServerGamePacketListenerMixin {
     }
 
     @Inject(method = "handleInteract",at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerPlayer.isWithinEntityInteractionRange (Lnet/minecraft/world/phys/AABB;D)Z",shift = At.Shift.AFTER))
-    private void playerPassengerBehaviour(CallbackInfo callbackInfo, @Local ServerboundInteractPacket interactPacket,@Local Entity target){
+    private void playerPassengerBehaviour(CallbackInfo callbackInfo, @Local ServerboundInteractPacket interactPacket, @Local Entity target){
         ServerPlayer excutor = player;
         MinecraftServer server = (MinecraftServer) FabricLoader.getInstance().getGameInstance();
         InteractionHand interactionHand = interactPacket.hand();
@@ -51,6 +55,7 @@ public class ServerGamePacketListenerMixin {
                 interactionHand == InteractionHand.MAIN_HAND
                         && target instanceof Player
                         && !target.getPassengers().contains(player)
+                        && player.getItemInHand(interactionHand).is(Items.AIR)
         ){
             Boolean b = excutor.startRiding(target,true,true);
             if(b){

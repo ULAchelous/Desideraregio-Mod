@@ -1,5 +1,6 @@
 package io.ula.drng.mixin.server;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import io.ula.drng.utils.PlayerUtils;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -25,5 +26,10 @@ public class MinecraftServerMixin {
         for (ServerPlayer serverPlayer : list)
             if (!PlayerUtils.isFakePlayer(serverPlayer)) fixedPlayerCount++;
         cir.setReturnValue(new ServerStatus.Players(i, fixedPlayerCount, objectArrayList));
+    }
+
+    @ModifyReturnValue(method = "getServerModName",at = @At("RETURN"))
+    private String serverModNameInject(String name){
+        return "§oDesideraregio§r";
     }
 }

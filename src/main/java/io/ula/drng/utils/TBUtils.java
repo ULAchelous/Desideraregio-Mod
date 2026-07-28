@@ -110,22 +110,20 @@ public class TBUtils {
         else
             nb = Component.literal("----------Flowing Notice----------").append("\n");
         ConfigFile NOTICE = Main.getConfigManager().getConfig("drng:notices");
-        if(NOTICE.has("notices")){
-            for(JsonElement element : NOTICE.getKey("notices").getAsJsonArray()){
+        if(NOTICE.has("notices")) {
+            for (JsonElement element : NOTICE.getKey("notices").getAsJsonArray()) {
                 JsonObject jsonObject = element.getAsJsonObject();
                 nb = nb.copy().append(Component.literal(jsonObject.get("author").getAsString()).withStyle(ChatFormatting.GRAY).append(Component.literal(":")))
                         .append(" ")
                         .append(Component.literal(jsonObject.get("title").getAsString()))
                         .append("\n");
             }
-            if(local.equals("zh_cn"))
+            if (local.equals("zh_cn"))
                 nb = nb.copy().append(Component.literal("点击查看详情").setStyle(Style.EMPTY.applyFormat(ChatFormatting.AQUA).withClickEvent(new ClickEvent.RunCommand("/notice list"))));
             else
                 nb = nb.copy().append(Component.literal("Click to view.").setStyle(Style.EMPTY.applyFormat(ChatFormatting.AQUA).withClickEvent(new ClickEvent.RunCommand("/notice list"))));
-            return nb;
-        }else{
-            return null;
         }
+        return nb;
     }
 
 }

@@ -9,6 +9,8 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 public class EntityPlayerMPFakeMixin {
     @ModifyVariable(method = "createFake",at = @At("HEAD"),argsOnly = true)
     private static String FPNameInject(String name){
-        return name + "(bot)";
+        if(!name.contains("bot"))
+            return name + "_bot";
+        return name;
     }
 }

@@ -1,6 +1,7 @@
 package io.ula.drng.mixin.server.network;
 
 
+import com.llamalad7.mixinextras.sugar.Local;
 import io.ula.drng.Main;
 
 import io.ula.drng.attachments.Attachments;
@@ -10,11 +11,17 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
+import net.minecraft.network.protocol.common.ClientboundServerLinksPacket;
+import net.minecraft.network.protocol.game.*;
+import net.minecraft.network.protocol.login.ClientboundHelloPacket;
+import net.minecraft.network.protocol.login.ClientboundLoginCompressionPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -30,10 +37,45 @@ public class ServerGamePacketListenerMixin {
     @Shadow
     private ServerPlayer player;
 
-    @Redirect(method = "method_44900",at = @At(value = "INVOKE", target = "net/minecraft/server/MinecraftServer.getChatDecorator ()Lnet/minecraft/network/chat/ChatDecorator;"))
+    @Redirect(method = "lambda$handleChat$0(Lnet/minecraft/network/protocol/game/ServerboundChatPacket;Ljava/util/Optional;)V",at = @At(value = "INVOKE", target = "net/minecraft/server/MinecraftServer.getChatDecorator ()Lnet/minecraft/network/chat/ChatDecorator;"))
     private ChatDecorator injected(MinecraftServer server){
         return Main.CUSTOM_CHAT_DECORATOR;
     }
+
+    @Inject(method = "handleInteract",at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerPlayer.isWithinEntityInteractionRange (Lnet/minecraft/world/phys/AABB;D)Z",shift = At.Shift.AFTER))
+    private void playerPassengerBehaviour(CallbackInfo callbackInfo, @Local ServerboundInteractPacket interactPacket,@Local Entity target){
+        ServerPlayer excutor = player;
+        MinecraftServer server = (MinecraftServer) FabricLoader.getInstance().getGameInstance();
+        InteractionHand interactionHand = interactPacket.hand();
+        if(
+                interactionHand == InteractionHand.MAIN_HAND
+                        && target instanceof Player
+                        && !target.getPassengers().contains(player)
+        ){
+            Boolean b = excutor.startRiding(target,true,true);
+            if(b){
+                ClientboundSetPassengersPacket packet = new ClientboundSetPassengersPacket(target);
+                for(ServerPlayer player : server.getPlayerList().getPlayers()){
+                    player.connection.send(packet);
+                }
+            }
+//            ci.cancel();
+        }
+    }
+
+    @Inject(method = "handleAttack",at = @At(value = "INVOKE", target = "net/minecraft/world/item/ItemStack.has (Lnet/minecraft/core/component/DataComponentType;)Z",shift = At.Shift.AFTER))
+    private void playerPassengerUnrideBehaviour(CallbackInfo callbackInfo,@Local Entity target){
+        ServerPlayer excutor = player;
+        MinecraftServer server = (MinecraftServer) FabricLoader.getInstance().getGameInstance();
+        if(excutor.getPassengers().contains(target)) {
+            target.stopRiding();
+            ClientboundSetPassengersPacket packet = new ClientboundSetPassengersPacket(excutor);
+            for(ServerPlayer player : server.getPlayerList().getPlayers()){
+                player.connection.send(packet);
+            }
+        }
+    }
+
 
     @Redirect(method = "removePlayerFromWorld",at = @At(value = "INVOKE",target = "net/minecraft/server/players/PlayerList.broadcastSystemMessage (Lnet/minecraft/network/chat/Component;Z)V"))
     private void modifyQuitMsg(PlayerList playerList, Component component,boolean b1){

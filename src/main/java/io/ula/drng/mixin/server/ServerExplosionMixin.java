@@ -8,6 +8,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
@@ -38,14 +39,14 @@ public class ServerExplosionMixin {
 
     @Inject(method = "calculateExplodedPositions",at = @At("HEAD"),cancellable = true)
     private void removeCreeperExplosion(CallbackInfoReturnable<List<BlockPos>> cir){
-        if(this.source.getType().equals(EntityType.CREEPER)){
+        if(this.source.getType().equals(EntityTypes.CREEPER)){
             cir.setReturnValue(new ObjectArrayList<>());
         }
     }
 
     @Inject(method = "explode",at = @At(value = "RETURN",shift = At.Shift.BEFORE))
     private void spawnFireworkRocketEntity(CallbackInfoReturnable<Integer> cir){
-        if(source!=null && source.getType().equals(EntityType.CREEPER)){
+        if(source!=null && source.getType().equals(EntityTypes.CREEPER)){
             Vec3 pos = source.position().add(new Vec3(0,2,0));
             Level level = source.level();
             FireworkExplosion fireworkExplosion = new FireworkExplosion(

@@ -14,6 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.component.ResolvableProfile;
 import org.apache.logging.log4j.core.jmx.Server;
@@ -24,6 +25,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.Optional;
 
 @Mixin(Player.class)
 public abstract class PlayerMixin {
@@ -41,7 +44,7 @@ public abstract class PlayerMixin {
         Component titles = PlayerUtils.getPlayerTitles(getName().getString());
         ResolvableProfile resolvableProfile = ResolvableProfile.createResolved(getGameProfile());
         MutableComponent returnValue =
-                MutableComponent.create(new ObjectContents(new PlayerSprite(resolvableProfile,true)))
+                MutableComponent.create(new ObjectContents(new PlayerSprite(resolvableProfile,true), Optional.of(Component.literal(String.format("[%s]",resolvableProfile.name())))))
                         .append(Component.literal(" "))
                         .append(titles.copy())
                         .append(cir.getReturnValue());
@@ -53,7 +56,7 @@ public abstract class PlayerMixin {
         if(player instanceof ServerPlayer serverPlayer) {
             Entity vehicle = serverPlayer.getVehicle();
             player.stopRiding();
-            if (vehicle.getType().equals(EntityType.PLAYER)) {
+            if (vehicle.getType().equals(EntityTypes.PLAYER)) {
                 ClientboundSetPassengersPacket packet = new ClientboundSetPassengersPacket(vehicle);
                 for (ServerPlayer p : serverPlayer.level().getServer().getPlayerList().getPlayers()) {
                     p.connection.send(packet);

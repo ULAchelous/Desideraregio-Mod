@@ -15,6 +15,7 @@ import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.ScoreHolder;
@@ -29,11 +30,7 @@ import java.util.UUID;
 public class ScoreBoardHelper {
     private static Map<UUID, Objective> objectives = new HashMap<>();
     private static MinecraftServer server = (MinecraftServer) FabricLoader.getInstance().getGameInstance();
-//    private static JavaPlugin plugin;
-//    public static void init(JavaPlugin plg){
-//        plugin=plg;
-//        scoreboardManager = plugin.getServer().getScoreboardManager();
-//    }
+
     public static void initObjective(ServerPlayer player){
         Objective sidebar;
         String local = player.clientInformation().language();
@@ -58,8 +55,7 @@ public class ScoreBoardHelper {
                         .append(Component.literal(" - NextGen").withColor(0x003366))
                         .withStyle(ChatFormatting.BOLD, ChatFormatting.ITALIC);
             }
-            sidebar = new Objective(
-                    scoreboard,
+            sidebar = scoreboard.addObjective(
                     player.getName().getString(),
                     ObjectiveCriteria.DUMMY,
                     server_name,
@@ -67,6 +63,7 @@ public class ScoreBoardHelper {
                     true,
                     BlankFormat.INSTANCE
             );
+
 
             objectives.put(player.getUUID(), sidebar);
         }
@@ -91,8 +88,8 @@ public class ScoreBoardHelper {
     public static void initOverrideObjectives(){
         Scoreboard scoreboard = server.getScoreboard();
 
-        Objective health_display = new Objective(scoreboard
-                ,"health",
+        Objective health_display = scoreboard.addObjective (
+                "health",
                 ObjectiveCriteria.HEALTH,
                 Component.literal("health"),
                 ObjectiveCriteria.RenderType.HEARTS,
@@ -100,8 +97,11 @@ public class ScoreBoardHelper {
                 null
         );
 
-        health_display.setDisplayAutoUpdate(true);
+        //health_display.setDisplayAutoUpdate(true);
         scoreboard.setDisplayObjective(DisplaySlot.LIST,health_display);
+        for(ServerPlayer player : server.getPlayerList().getPlayers()){
+            setPlayerObjective(player,health_display,DisplaySlot.LIST);
+        }
     }
 
     public static void removeObjective(ServerPlayer player) {
@@ -163,7 +163,7 @@ public class ScoreBoardHelper {
         ClientboundSetObjectivePacket removeObjectivePacket = new ClientboundSetObjectivePacket(objective,1);
         ClientboundSetObjectivePacket setObjectivePacket = new ClientboundSetObjectivePacket(objective,0);
         ClientboundSetDisplayObjectivePacket displayObjectivePacket = new ClientboundSetDisplayObjectivePacket(solt,objective);
-        player.connection.send(removeObjectivePacket);
+        //player.connection.send(removeObjectivePacket);
         player.connection.send(setObjectivePacket);
         player.connection.send(displayObjectivePacket);
     }

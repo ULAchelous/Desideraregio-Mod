@@ -39,8 +39,10 @@ public class ServerExplosionMixin {
 
     @Inject(method = "calculateExplodedPositions",at = @At("HEAD"),cancellable = true)
     private void removeCreeperExplosion(CallbackInfoReturnable<List<BlockPos>> cir){
-        if(this.source.getType().equals(EntityTypes.CREEPER)){
-            cir.setReturnValue(new ObjectArrayList<>());
+        if(this.source != null) {
+            if (this.source.getType().equals(EntityTypes.CREEPER)) {
+                cir.setReturnValue(new ObjectArrayList<>());
+            }
         }
     }
 

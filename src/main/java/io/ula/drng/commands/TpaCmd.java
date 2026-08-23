@@ -33,8 +33,8 @@ public class TpaCmd {
                 ServerPlayer sendr = (ServerPlayer) context.getSource().getPlayer();
                 String local = sendr.clientInformation().language();
                 ServerPlayer target = context.getArgument("target", EntitySelector.class).findSinglePlayer(context.getSource());
-                ServerScheduler serverScheduler = ((ServerSchedulerHolder)context.getSource().getServer()).drng$getServerSchedule();
-                serverScheduler.runTask(new ScheduleTask(sendr.getName().getString() + "TpaTimeOut",() -> {
+                ServerScheduler serverScheduler = ((ServerSchedulerHolder)context.getSource().getServer()).getServerSchedule();
+                serverScheduler.runTask(new ScheduleTask(sendr.getName().getString() + "TpaTimeOut",(server,task) -> {
                     sendr.sendSystemMessage(Component.literal("传送请求超时").withStyle(ChatFormatting.RED));
                     PlayerStatusData targetData = sendr.getAttached(Attachments.PLAYER_STATUS_DATA);
                     sendr.setAttached(Attachments.PLAYER_STATUS_DATA,new PlayerStatusData(targetData.been_controlled(),targetData.is_controlling(),targetData.location_before_control(),Optional.empty()));
@@ -95,7 +95,7 @@ public class TpaCmd {
     public static LiteralCommandNode<CommandSourceStack> PTACmd = Commands.literal("player-teleport-accept")
             .then(Commands.argument("target",EntityArgument.player())
                     .executes(commandContext -> {
-                        ServerScheduler serverScheduler = ((ServerSchedulerHolder)commandContext.getSource().getServer()).drng$getServerSchedule();
+                        ServerScheduler serverScheduler = ((ServerSchedulerHolder)commandContext.getSource().getServer()).getServerSchedule();
                         ServerPlayer sender = commandContext.getSource().getPlayer();
                         ServerPlayer target = commandContext.getArgument("target", EntitySelector.class).findSinglePlayer(commandContext.getSource());
                         PlayerStatusData targetData = target.getAttached(Attachments.PLAYER_STATUS_DATA);

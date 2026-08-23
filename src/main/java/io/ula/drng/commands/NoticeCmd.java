@@ -38,7 +38,7 @@ public class NoticeCmd {
                         String local = sender.clientInformation().language();
                         ItemStack is = sender.getItemInHand(InteractionHand.MAIN_HAND);
                         sender.setItemInHand(InteractionHand.MAIN_HAND,getNoticeBook(local));
-                        ((ServerSchedulerHolder)commandContext.getSource().getServer()).drng$getServerSchedule().runTask(new ScheduleTask(sender.getName().getString()+"replaceItem",() -> {
+                        ((ServerSchedulerHolder)commandContext.getSource().getServer()).getServerSchedule().runTask(new ScheduleTask(sender.getName().getString()+"replaceItem",(server,task) -> {
                             sender.connection.send(new ClientboundOpenBookPacket(InteractionHand.MAIN_HAND));
                             sender.setItemInHand(InteractionHand.MAIN_HAND,is);
                         },5));

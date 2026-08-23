@@ -71,8 +71,8 @@ public class Main implements ModInitializer {
     private void callbackRegister(){
         ServerLifecycleEvents.SERVER_STARTED.register(minecraftServer -> {
             ScoreBoardHelper.initOverrideObjectives();
-            ServerScheduler scheduler = ((ServerSchedulerHolder) minecraftServer).drng$getServerSchedule();
-            scheduler.runTask(new ScheduleTask("UpdateOnlineTime",() -> {
+            ServerScheduler scheduler = ((ServerSchedulerHolder) minecraftServer).getServerSchedule();
+            scheduler.runTask(new ScheduleTask("UpdateOnlineTime",(server,task) -> {
                 for(ServerPlayer player : minecraftServer.getPlayerList().getPlayers()){
                     if(!PlayerUtils.isFakePlayer(player)) {
                         PlayerCntData data = player.getAttached(Attachments.PLAYER_CNT_DATA);
@@ -81,8 +81,9 @@ public class Main implements ModInitializer {
                     }
                 }
             },0,1200));
-            scheduler.runTask(new ScheduleTask("DisplayTips",TBUtils::tipsBehaviour,0,25*60*20));
-            scheduler.runTask(new ScheduleTask("Alice",TBUtils::aliceBehaviour,30*60*20,30*60*20));
+            scheduler.runTask(new ScheduleTask("DisplayTips",(server,task) -> TBUtils.tipsBehaviour(),0,25*60*20));
+            scheduler.runTask(new ScheduleTask("Alice",(server,task) -> TBUtils.alice(),27*60*20,27*60*20));
+            //30*60*20
             //注册任务
         });
         ServerLifecycleEvents.SERVER_STOPPING.register(minecraftServer -> {

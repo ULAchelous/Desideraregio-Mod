@@ -51,7 +51,7 @@ dependencies {
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:0.155.2+26.2"
 
-    implementation name: 'ULA-API-26.2+1.26.726'
+    implementation name: 'ULA-API-26.2+1.26.726-v2'
     implementation name: 'fabric-carpet-26.2+v260616'
 }
 

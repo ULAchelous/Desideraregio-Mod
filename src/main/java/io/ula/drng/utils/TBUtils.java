@@ -2,6 +2,9 @@ package io.ula.drng.utils;
 
 import com.google.gson.*;
 import com.mojang.authlib.GameProfile;
+import io.ula.api.scheduler.ScheduleTask;
+import io.ula.api.scheduler.ServerScheduler;
+import io.ula.api.scheduler.ServerSchedulerHolder;
 import io.ula.drng.Main;
 import io.ula.api.config.*;
 import net.fabricmc.loader.api.FabricLoader;
@@ -32,6 +35,30 @@ import java.util.UUID;
 
 public class TBUtils {
     private static MinecraftServer server = (MinecraftServer) FabricLoader.getInstance().getGameInstance();
+    private static volatile int al1sTimerCnt = 3;
+    public static void alice(){
+
+        ResolvableProfile profile = Util.buildProfile(UUID.fromString("793be6b0-de85-412a-8483-636d6f8c74d0"));
+        Component component = Component.empty()
+                .append(Component.object(new PlayerSprite(profile,true)))
+                .append(Component.literal("["))
+                .append(Component.literal("AL-1S").setStyle(Style.EMPTY.withColor(0x76d7ea).applyFormat(ChatFormatting.BOLD)))
+                .append(Component.literal("] 距离下次清理还有"));
+
+        ServerScheduler scheduler = ((ServerSchedulerHolder)server).getServerSchedule();
+        scheduler.runTask(new ScheduleTask("cleanTimer",(server,task) -> {
+            if(al1sTimerCnt <= 0) {
+                aliceBehaviour();
+                al1sTimerCnt = 3;
+                task.cancel();
+            }else {
+                for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                    player.sendSystemMessage(component.copy().append(Component.literal(Integer.toString(al1sTimerCnt)).withStyle(ChatFormatting.AQUA)).append("分钟"));
+                }
+                al1sTimerCnt--;
+            }
+        },0,60*20));
+    }
     public static void aliceBehaviour(){
         int owCnt = 0, netherCnt = 0, teCnt = 0;
         ServerLevel overworld = server.overworld();
@@ -41,7 +68,6 @@ public class TBUtils {
         List<? extends ItemEntity> owEntities = overworld.getEntities(EntityTypeTest.forClass(ItemEntity.class),itemEntity -> itemEntity.isAlive());
         List<? extends ItemEntity> tnEntities = nether.getEntities(EntityTypeTest.forClass(ItemEntity.class),itemEntity -> itemEntity.isAlive());
         List<? extends ItemEntity> teEntities = the_end.getEntities(EntityTypeTest.forClass(ItemEntity.class),itemEntity -> itemEntity.isAlive());
-
         for (Entity entity : owEntities) {
                 if (entity != null) {
                     entity.remove(Entity.RemovalReason.DISCARDED);

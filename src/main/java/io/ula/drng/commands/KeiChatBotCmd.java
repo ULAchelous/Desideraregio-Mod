@@ -6,6 +6,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.ula.drng.utils.kei.KeiChatBotUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.permissions.Permissions;
 
 
@@ -14,6 +15,7 @@ public class KeiChatBotCmd {
             .then(Commands.literal("clear")
                     .executes(commandContext -> {
                         KeiChatBotUtils.clearContext();
+                        commandContext.getSource().getPlayer().sendSystemMessage(Component.literal("上下文已清除"));
                         return 0;
                     })
                     .requires(commandSourceStack -> commandSourceStack.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
@@ -21,6 +23,7 @@ public class KeiChatBotCmd {
             .then(Commands.argument("msg",StringArgumentType.string())
                     .executes(commandContext -> {
                         String msg = commandContext.getArgument("msg",String.class);
+                        KeiChatBotUtils.map.put(commandContext.getSource().getPlayer().getUUID(),true);
                         KeiChatBotUtils.onChat(msg,commandContext.getSource().getPlayer().getUUID());
                         return 0;
                     }))

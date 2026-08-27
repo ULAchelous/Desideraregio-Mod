@@ -12,6 +12,7 @@ import io.ula.drng.dialog.CustomDialogs;
 import io.ula.api.scheduler.*;
 import io.ula.drng.utils.PlayerUtils;
 import io.ula.drng.utils.TBUtils;
+import io.ula.drng.utils.kei.KeiChatBotUtils;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
@@ -65,6 +66,7 @@ public class Main implements ModInitializer {
             rootNode.addChild(HelpCmd.helpCmd);
             rootNode.addChild(NoticeCmd.noticeCmd);
             rootNode.addChild(AliceCmd.aliceCmd);
+            rootNode.addChild(KeiChatBotCmd.keiCmd);
         });
     }
 

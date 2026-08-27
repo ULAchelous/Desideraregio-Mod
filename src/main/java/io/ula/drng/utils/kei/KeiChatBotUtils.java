@@ -159,6 +159,10 @@ public class KeiChatBotUtils {
         }
     }
 
+    public static void clearContext(){
+        msgQueue = new LinkedList<>();
+        prompt = "";
+    }
     private static JsonObject errorJson(String info){
         JsonObject err = new JsonObject();
         err.addProperty("error", info);

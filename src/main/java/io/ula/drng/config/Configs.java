@@ -43,8 +43,17 @@ public class  Configs {
         log_cmd.addProperty("version",version);
         log_cmd.add("commands",new JsonArray());
 
+        JsonObject keiContent = new JsonObject();
+        keiContent.addProperty("system_prompt","");
+        keiContent.addProperty("api","");
+        keiContent.addProperty("api_key","");
+        keiContent.addProperty("model","");
+        keiContent.addProperty("max_history_size",100);
+        //凯伊配置文件基础内容
+
         ConfigManager configManager = Main.getConfigManager();
          configManager.register("drng:main",new ConfigFile("config.json",null,mainConfigs));
+        configManager.register("drng:kei",new ConfigFile("kei.json",ConfigPath.TALKBAR,keiContent));
         //configManager.register("drng:log_cmd",new ConfigFile("log_cmd.json",ConfigPath.COMMAND,log_cmd));
         configManager.register("drng:titles",new ConfigFile("player_titles.json",ConfigPath.PLAYER,null));
         configManager.register("drng:tips",new ConfigFile("tips.json",ConfigPath.TALKBAR,null));

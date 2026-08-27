@@ -35,7 +35,7 @@ public class ServerStatusPacketListenerMixin {
             isFetching = true;
             CompletableFuture.runAsync(() -> {
                 try {
-                    JsonObject response = Util.requestAPIAsJson(new URL("https://v1.hitokoto.cn"));
+                    JsonObject response = Util.requestAPIAsJson(new URL("https://v1.hitokoto.cn"),5000,15000);
 
                     String hitokoto = response.get("hitokoto").getAsString();
                     JsonElement e1 = response.get("from");

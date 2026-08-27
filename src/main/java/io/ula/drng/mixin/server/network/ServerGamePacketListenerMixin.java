@@ -6,15 +6,14 @@ import io.ula.drng.Main;
 
 import io.ula.drng.attachments.Attachments;
 import io.ula.drng.attachments.PlayerStatusData;
+import io.ula.drng.utils.kei.KeiChatBotUtils;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.network.protocol.common.ClientboundServerLinksPacket;
 import net.minecraft.network.protocol.game.*;
-import net.minecraft.network.protocol.login.ClientboundHelloPacket;
-import net.minecraft.network.protocol.login.ClientboundLoginCompressionPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -22,9 +21,6 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.AirItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,6 +36,23 @@ public class ServerGamePacketListenerMixin {
     private MinecraftServer server = (MinecraftServer) FabricLoader.getInstance().getGameInstance();
     @Shadow
     private ServerPlayer player;
+
+    @Inject(method = "lambda$handleChat$0(Lnet/minecraft/network/protocol/game/ServerboundChatPacket;Ljava/util/Optional;)V",at = @At("TAIL"))
+    private void KeyChatMsgListener(CallbackInfo callbackInfo, @Local PlayerChatMessage signedMessage){
+        String literalMsg = signedMessage.decoratedContent().getString();
+        KeiChatBotUtils.appendMsg(literalMsg,signedMessage.sender());
+        if(!KeiChatBotUtils.map.containsKey(signedMessage.sender()))
+            KeiChatBotUtils.map.put(signedMessage.sender(),false);
+        if(KeiChatBotUtils.map.get(signedMessage.sender())){
+            KeiChatBotUtils.onChat(literalMsg,signedMessage.sender());
+            KeiChatBotUtils.map.put(signedMessage.sender(),false);
+        }
+        if(literalMsg.contains("kei") || literalMsg.contains("凯伊") || literalMsg.contains("柯伊") || literalMsg.contains("ケイ") || literalMsg.contains("爱丽丝") || literalMsg.contains("王女") || literalMsg.contains("AL-1S")){
+            KeiChatBotUtils.map.put(signedMessage.sender(),true);
+            KeiChatBotUtils.onChat(literalMsg,signedMessage.sender());
+        }
+
+    }
 
     @Redirect(method = "lambda$handleChat$0(Lnet/minecraft/network/protocol/game/ServerboundChatPacket;Ljava/util/Optional;)V",at = @At(value = "INVOKE", target = "net/minecraft/server/MinecraftServer.getChatDecorator ()Lnet/minecraft/network/chat/ChatDecorator;"))
     private ChatDecorator injected(MinecraftServer server){

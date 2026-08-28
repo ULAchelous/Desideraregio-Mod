@@ -49,6 +49,11 @@ public class  Configs {
         keiContent.addProperty("api_key","");
         keiContent.addProperty("model","");
         keiContent.addProperty("max_history_size",100);
+        keiContent.addProperty("use_puca_bot",false);
+        keiContent.add("puca",new JsonObject());
+        keiContent.get("puca").getAsJsonObject().addProperty("api","");
+        keiContent.get("puca").getAsJsonObject().addProperty("api_key","");
+        keiContent.get("puca").getAsJsonObject().addProperty("model","");
         //凯伊配置文件基础内容
 
         ConfigManager configManager = Main.getConfigManager();

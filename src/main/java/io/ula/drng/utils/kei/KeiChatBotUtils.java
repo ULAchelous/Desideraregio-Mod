@@ -30,6 +30,7 @@ import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -48,6 +49,9 @@ import org.apache.logging.log4j.Logger;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
@@ -74,35 +78,48 @@ public class KeiChatBotUtils {
     }
     public static void callModel(UUID user,String msg){
         isGenerating = true;
+        Boolean usePuca = keiConfig.getKey("use_puca_bot").getAsBoolean();
         try {
             URL baseURL;
             try {
-                baseURL = new URL(keiConfig.getKey("api").getAsString());
+                baseURL = new URL(!usePuca ? keiConfig.getKey("api").getAsString() : keiConfig.getKey("puca").getAsJsonObject().get("api").getAsString());
             }catch (MalformedURLException e){
                 LOGGER.error(e.getMessage());
                 LogErr("apiURL格式不正确");
                 return;
             }
-            String apiKey = keiConfig.getKey("api_key").getAsString();
-            String model = keiConfig.getKey("model").getAsString();
-            String systemPrompt = keiConfig.getKey("system_prompt").getAsString() + prompt;
-            if(apiKey.isBlank()){
+            String apiKey,model,systemPrompt="";
+            if(!usePuca) {
+                apiKey = keiConfig.getKey("api_key").getAsString();
+                model = keiConfig.getKey("model").getAsString();
+                systemPrompt = keiConfig.getKey("system_prompt").getAsString() + prompt;
+
+            }else {
+                JsonObject pucaConfig = keiConfig.getKey("puca").getAsJsonObject();
+                apiKey = pucaConfig.get("api_key").getAsString();
+                model = pucaConfig.get("model").getAsString();
+            }
+            if (apiKey.isBlank()) {
                 LogErr("apiKey为空");
                 return;
             }
-            if(model.isBlank()){
+            if (model.isBlank()) {
                 LogErr("模型名称为空");
                 return;
             }
-
+            ServerPlayer sender = null;
+            if(server != null)
+               sender = server.getPlayerList().getPlayer(user);
             JsonArray messages = new JsonArray();
-            JsonObject systemMsg = new JsonObject();
-            systemMsg.addProperty("role","system");
-            systemMsg.addProperty("content", systemPrompt);
+            if(!usePuca) {
+                JsonObject systemMsg = new JsonObject();
+                systemMsg.addProperty("role", "system");
+                systemMsg.addProperty("content", systemPrompt);
+                messages.add(systemMsg);
+            }
             JsonObject userMsg = new JsonObject();
             userMsg.addProperty("role","user");
-            userMsg.addProperty("content",user.toString() + ":" + msg);
-            messages.add(systemMsg);
+            userMsg.addProperty("content",!usePuca && sender != null ? buildChatMsg(msg,sender) : msg);
             messages.add(userMsg);
 
             JsonObject payload = new JsonObject();
@@ -110,8 +127,21 @@ public class KeiChatBotUtils {
             payload.add("messages", messages);
             payload.add("tools", buildTools());
 
+            //puca bot兼容
+            if(usePuca){
+                payload.addProperty("conversation_id","mc-desideraregio");
+                payload.addProperty("sender_id",user.toString());
+                payload.addProperty("sender_name",sender != null ? sender.getName().getString() : "unknown");
+                JsonArray cache = new JsonArray();
+                while (!msgQueue.isEmpty())
+                    cache.add(msgQueue.poll());
+                payload.add("cache",cache);
+            }
+
             for (int round = 0; round < MAX_TOOL_ROUNDS; round++) {
                 JsonObject response;
+                if(round == 1)
+                    payload.remove("cache");
                 try {
                     response = Util.requestOpenAIAPIAsJson(baseURL, payload, 10000, 60000, apiKey);
                 } catch (Exception e){
@@ -172,6 +202,17 @@ public class KeiChatBotUtils {
         }
     }
 
+    private static String buildChatMsg(String content, Player sender){
+        String result;
+        String playerInfo = sender.getName().getString() + "(" + sender.getUUID().toString() + ")";
+        ZonedDateTime zdt = ZonedDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(" E yyyy-MM-dd HH:mm:ss ",Locale.ENGLISH);
+        int hourOffSet = zdt.getOffset().getTotalSeconds() / 3600;
+        String zoneOffSet = "GMT" + (hourOffSet >= 0?"+":"") + Integer.toString(hourOffSet);
+        String dateTimeStr = zdt.format(formatter)+zoneOffSet;
+        result ="[" + playerInfo + dateTimeStr + "] " + content;
+        return result;
+    }
 
     private static JsonObject executeTool(String name, JsonObject args){
         for(Tool t : Tools.TOOLS){
@@ -253,15 +294,21 @@ public class KeiChatBotUtils {
 
     public static void appendMsg(String msg,UUID user){
         keiConfig = Main.getConfigManager().getConfig("drng:kei");
-        String msgh = String.format("%s:%s",server.getPlayerList().getPlayer(user).getName().getString(),msg);
-        if(msgQueue.size() >= keiConfig.getKey("max_history_size").getAsInt()) {
-            msgQueue.remove();
-            if(prompt.indexOf('\n') != -1)
-                prompt = prompt.substring(prompt.indexOf('\n'));
+        ServerPlayer player = server.getPlayerList().getPlayer(user);
+        String msgh = buildChatMsg(msg,player);
+
+        if(!keiConfig.getKey("use_puca_bot").getAsBoolean()){
+            if(msgQueue.size() >= keiConfig.getKey("max_history_size").getAsInt()) {
+                msgQueue.remove();
+                if(prompt.indexOf('\n') != -1)
+                    prompt = prompt.substring(prompt.indexOf('\n'));
+            }
+            if(!prompt.isBlank()) prompt += '\n';
+            prompt += msgh;
         }
         msgQueue.offer(msgh);
-        if(!prompt.isBlank()) prompt += '\n';
-        prompt += msgh;
+
+
     }
     private static void LogErr(String info){
         MinecraftServer srv = server;

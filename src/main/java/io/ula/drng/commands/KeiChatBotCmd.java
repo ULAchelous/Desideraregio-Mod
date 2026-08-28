@@ -29,8 +29,8 @@ public class KeiChatBotCmd {
                         commandContext.getSource().getPlayer().sendSystemMessage(Component.literal("已加载的工具:"));
                         for(Tool tool : Tools.TOOLS){
                             Component perfix = Component.empty();
-                            if(perfix instanceof FuncTool funcTool) {
-                                perfix = Component.literal("function").withStyle(ChatFormatting.YELLOW);
+                            if(tool instanceof FuncTool funcTool) {
+                                perfix = Component.literal("function:").withStyle(ChatFormatting.YELLOW);
                                 commandContext.getSource().getPlayer().sendSystemMessage(perfix.copy().append(Component.literal(funcTool.getName()).withStyle(ChatFormatting.AQUA)));
                             }
                         }

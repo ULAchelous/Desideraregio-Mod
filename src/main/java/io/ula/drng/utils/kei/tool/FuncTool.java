@@ -2,7 +2,7 @@ package io.ula.drng.utils.kei.tool;
 
 import com.google.gson.JsonObject;
 
-public class FuncTool {
+public class FuncTool extends Tool {
     @FunctionalInterface
     public interface Func{
         public JsonObject func(JsonObject args);

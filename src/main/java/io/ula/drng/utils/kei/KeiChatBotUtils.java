@@ -220,7 +220,10 @@ public class KeiChatBotUtils {
             map.put(sender.getUUID(),true);
         srv.execute(() -> {
             ResolvableProfile profile = Util.buildProfile(UUID.fromString("2b856f35-91bb-4a09-80b6-6c81d7d28787"));
-            MutableComponent mu = Component.literal("<").append(Component.object(new PlayerSprite(profile,true))).append(" kei>").append(" ");
+            MutableComponent mu = Component.literal("<").append(Component.object(new PlayerSprite(profile,true))).append(" ")
+                    .append(PlayerUtils.getPlayerTitles("kei"))
+                    .append("kei>")
+                    .append(" ");
             for(ServerPlayer player : srv.getPlayerList().getPlayers())
                 player.sendSystemMessage(mu.copy().append(content));
         });

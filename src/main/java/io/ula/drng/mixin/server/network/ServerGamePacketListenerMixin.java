@@ -46,8 +46,7 @@ public class ServerGamePacketListenerMixin {
         if(KeiChatBotUtils.map.get(signedMessage.sender())){
             KeiChatBotUtils.onChat(literalMsg,signedMessage.sender());
             KeiChatBotUtils.map.put(signedMessage.sender(),false);
-        }
-        if(literalMsg.contains("kei") || literalMsg.contains("凯伊") || literalMsg.contains("柯伊") || literalMsg.contains("ケイ") || literalMsg.contains("爱丽丝") || literalMsg.contains("王女") || literalMsg.contains("AL-1S")){
+        }else if(literalMsg.contains("kei") || literalMsg.contains("凯伊") || literalMsg.contains("柯伊") || literalMsg.contains("ケイ") || literalMsg.contains("爱丽丝") || literalMsg.contains("王女") || literalMsg.contains("AL-1S")){
             KeiChatBotUtils.map.put(signedMessage.sender(),true);
             KeiChatBotUtils.onChat(literalMsg,signedMessage.sender());
         }

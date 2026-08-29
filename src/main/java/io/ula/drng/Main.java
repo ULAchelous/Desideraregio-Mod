@@ -12,7 +12,7 @@ import io.ula.drng.dialog.CustomDialogs;
 import io.ula.api.scheduler.*;
 import io.ula.drng.utils.PlayerUtils;
 import io.ula.drng.utils.TBUtils;
-import io.ula.drng.utils.kei.KeiChatBotUtils;
+import io.ula.drng.utils.kei.PucaUtil;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
@@ -84,7 +84,8 @@ public class Main implements ModInitializer {
                 }
             },0,1200));
             scheduler.runTask(new ScheduleTask("DisplayTips",(server,task) -> TBUtils.tipsBehaviour(),0,25*60*20));
-            scheduler.runTask(new ScheduleTask("Alice",(server,task) -> TBUtils.alice(),27*60*20,27*60*20));
+            scheduler.runTask(new ScheduleTask("Alice",(server,task) -> TBUtils.alice(),27*60*20,27*60*20));   
+            scheduler.runTask(new ScheduleTask("PucaPoll",(server,task) -> PucaUtil.pollMessages(),0,20));
             //30*60*20
             //注册任务
         });

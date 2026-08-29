@@ -54,6 +54,7 @@ public class  Configs {
         keiContent.get("puca").getAsJsonObject().addProperty("api","");
         keiContent.get("puca").getAsJsonObject().addProperty("api_key","");
         keiContent.get("puca").getAsJsonObject().addProperty("model","");
+        keiContent.get("puca").getAsJsonObject().addProperty("message_poll",false);
         //凯伊配置文件基础内容
 
         ConfigManager configManager = Main.getConfigManager();

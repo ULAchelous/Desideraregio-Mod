@@ -23,6 +23,8 @@ public class Tools {
                             )
                             .required("x", "y", "z", "radius"),
                     args -> {
+                        if(!args.has("x") || !args.has("y") || !args.has("z"))
+                            return KeiChatBotUtils.errorJson("缺少坐标参数 x/y/z");
                         int x = args.get("x").getAsInt();
                         int y = args.get("y").getAsInt();
                         int z = args.get("z").getAsInt();
@@ -41,6 +43,8 @@ public class Tools {
                             )
                             .required("x", "y", "z"),
                     args -> {
+                        if(!args.has("x") || !args.has("y") || !args.has("z"))
+                            return KeiChatBotUtils.errorJson("缺少坐标参数 x/y/z");
                         int x = args.get("x").getAsInt();
                         int y = args.get("y").getAsInt();
                         int z = args.get("z").getAsInt();
@@ -59,6 +63,8 @@ public class Tools {
                             )
                             .required("x", "y", "z", "radius"),
                     args -> {
+                        if(!args.has("x") || !args.has("y") || !args.has("z"))
+                            return KeiChatBotUtils.errorJson("缺少坐标参数 x/y/z");
                         int x = args.get("x").getAsInt();
                         int y = args.get("y").getAsInt();
                         int z = args.get("z").getAsInt();

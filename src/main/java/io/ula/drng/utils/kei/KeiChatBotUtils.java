@@ -82,7 +82,13 @@ public class KeiChatBotUtils {
         try {
             URL baseURL;
             try {
-                baseURL = new URL(!usePuca ? keiConfig.getKey("api").getAsString() : keiConfig.getKey("puca").getAsJsonObject().get("api").getAsString());
+                // puca.api 为基础路径（如 http://127.0.0.1:8700/v1）→ 拼完整 chat 端点；
+                // 若已带 /chat/completions 后缀则直接用（兼容两种写法）
+                String apiUrl = !usePuca ? keiConfig.getKey("api").getAsString()
+                        : keiConfig.getKey("puca").getAsJsonObject().get("api").getAsString();
+                if(usePuca && !apiUrl.endsWith("/chat/completions"))
+                    apiUrl = (apiUrl.endsWith("/") ? apiUrl : apiUrl + "/") + "chat/completions";
+                baseURL = new URL(apiUrl);
             }catch (MalformedURLException e){
                 LOGGER.error(e.getMessage());
                 LogErr("apiURL格式不正确");
@@ -96,7 +102,7 @@ public class KeiChatBotUtils {
 
             }else {
                 JsonObject pucaConfig = keiConfig.getKey("puca").getAsJsonObject();
-                apiKey = pucaConfig.get("api_key").getAsString();
+                apiKey = pucaConfig.get("api_key").getAsString()+"/chat/completions";
                 model = pucaConfig.get("model").getAsString();
             }
             if (apiKey.isBlank()) {
@@ -128,6 +134,7 @@ public class KeiChatBotUtils {
             payload.add("tools", buildTools());
 
             //puca bot兼容
+            JsonArray toolRounds = null;
             if(usePuca){
                 payload.addProperty("conversation_id","mc-desideraregio");
                 payload.addProperty("sender_id",user.toString());
@@ -136,10 +143,14 @@ public class KeiChatBotUtils {
                 while (!msgQueue.isEmpty())
                     cache.add(msgQueue.poll());
                 payload.add("cache",cache);
+                toolRounds = new JsonArray();
+                payload.add("tool_rounds",toolRounds);
             }
 
             for (int round = 0; round < MAX_TOOL_ROUNDS; round++) {
                 JsonObject response;
+                if(usePuca)
+                    payload.addProperty("tool_round", round);
                 if(round == 1)
                     payload.remove("cache");
                 try {
@@ -167,7 +178,10 @@ public class KeiChatBotUtils {
                     sendReply(content,server.getPlayerList().getPlayer(user));
                     return;
                 }
-                messages.add(message);
+                if(usePuca)
+                    toolRounds.add(message);
+                else
+                    messages.add(message);
                 for (JsonElement toolCallElement : message.getAsJsonArray("tool_calls")) {
                     JsonObject toolCall = toolCallElement.getAsJsonObject();
                     String toolName = toolCall.getAsJsonObject("function").get("name").getAsString();
@@ -189,7 +203,10 @@ public class KeiChatBotUtils {
                     toolMsg.addProperty("role","tool");
                     toolMsg.addProperty("tool_call_id", toolCall.get("id").getAsString());
                     toolMsg.addProperty("content", toolResult.toString());
-                    messages.add(toolMsg);
+                    if(usePuca)
+                        toolRounds.add(toolMsg);
+                    else
+                        messages.add(toolMsg);
                 }
             }
             LogErr("工具调用轮数超限，已停止");
@@ -275,11 +292,11 @@ public class KeiChatBotUtils {
         return tools;
     }
 
-    private static void sendReply(String content,ServerPlayer sender){
+    public static void sendReply(String content,ServerPlayer sender){
         if(content == null || content.isBlank()) return;
         MinecraftServer srv = server;
         if(srv == null) return;
-        if(content.contains(sender.getName().getString()))
+        if(sender != null && content.contains(sender.getName().getString()))
             map.put(sender.getUUID(),true);
         srv.execute(() -> {
             ResolvableProfile profile = Util.buildProfile(UUID.fromString("2b856f35-91bb-4a09-80b6-6c81d7d28787"));

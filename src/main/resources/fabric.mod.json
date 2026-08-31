@@ -20,7 +20,7 @@
   "depends": {
     "fabricloader": ">=${loader_version}",
     "minecraft": "${minecraft_version}",
-    "ula_api": ">=0.26.530"
+    "ula_api": ">=1.26.820"
   },
   "suggests": {
     "carpet": "*"
